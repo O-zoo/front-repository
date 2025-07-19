@@ -1,27 +1,35 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, Image, Button, StyleSheet } from "react-native";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 
 const BACKEND_DOMAIN = "https://o-zoo-back.onrender.com";
 
 const Main = () => {
   const router = useRouter();
+  const params = useLocalSearchParams();
   const [profile, setProfile] = useState<any>(null);
 
+  const token = typeof params.token === "string" ? params.token : null;
+
   useEffect(() => {
+    if (!token) return;
+
     // Express 백엔드의 /profile 엔드포인트에서 사용자 정보 불러오기
     fetch(`${BACKEND_DOMAIN}/profile`, {
-      method: "GET",
-      credentials: "include", // 세션 쿠키 필요 시(WebView는 불가, 딥링크 방식이면 세션 대신 토큰 공유 필요)
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     })
       .then((res) => res.json())
       .then(setProfile)
       .catch(() => setProfile(null));
-  }, []);
+  }, [token]);
 
   if (!profile) {
     return <Text>사용자 정보를 불러오는 중...</Text>;
   }
+  console.log(profile);
+  
 
   const { properties, kakao_account } = profile;
 
