@@ -1,65 +1,46 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, Button, ScrollView, StyleSheet } from 'react-native';
-import axios from 'axios';
-import { useLocalSearchParams } from 'expo-router';
+import React, { useEffect, useState } from "react";
+import { View, Text, Image, Button, StyleSheet } from "react-native";
+import { useRouter } from "expo-router";
 
-export default function MainScreen() {
-  const params = useLocalSearchParams();
-  const login = params?.login;
-  const token = params?.token;
-  const [responseText, setResponseText] = useState('');
-  const [loginSuccess, setLoginSuccess] = useState(false);
+const BACKEND_DOMAIN = "https://o-zoo-back.onrender.com";
+
+const Main = () => {
+  const router = useRouter();
+  const [profile, setProfile] = useState<any>(null);
 
   useEffect(() => {
-    if (login === 'success' && token) {
-      setLoginSuccess(true);
-      // Optional: 토큰을 AsyncStorage 등 로컬에 저장
-    }
-  }, [login, token]);
+    // Express 백엔드의 /profile 엔드포인트에서 사용자 정보 불러오기
+    fetch(`${BACKEND_DOMAIN}/profile`, {
+      method: "GET",
+      credentials: "include", // 세션 쿠키 필요 시(WebView는 불가, 딥링크 방식이면 세션 대신 토큰 공유 필요)
+    })
+      .then((res) => res.json())
+      .then(setProfile)
+      .catch(() => setProfile(null));
+  }, []);
 
-  // API 요청 예시
-  const serverBaseUrl = 'https://o-zoo-back.onrender.com';
+  if (!profile) {
+    return <Text>사용자 정보를 불러오는 중...</Text>;
+  }
 
-  const handleApiRequest = async (endpoint: string) => {
-    try {
-      const res = await axios.get(
-        `${serverBaseUrl}${endpoint}`,
-        token ? { headers: { Authorization: `Bearer ${token}` } } : {}
-      );
-      setResponseText(JSON.stringify(res.data, null, 2));
-    } catch (error) {
-      const err = error as Error;
-      setResponseText('API 호출 에러: ' + err.message);
-    }
-  };
+  const { properties, kakao_account } = profile;
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>카카오 로그인 및 API 예제</Text>
-      <View style={styles.statusSection}>
-        {loginSuccess ? (
-          <Text style={{ color: 'green', fontSize: 18 }}>✅ 로그인 성공!</Text>
-        ) : (
-          <Text style={{ color: 'red', fontSize: 18 }}>🚪 아직 로그인하지 않았습니다.</Text>
-        )}
-        {token && <Text style={{ marginTop: 10 }}>🔐 토큰: {token}</Text>}
-      </View>
-      <View style={styles.buttonGroup}>
-        <Button title="내 프로필 조회" onPress={() => handleApiRequest('/profile')} />
-        <Button title="로그아웃" onPress={() => handleApiRequest('/logout')} />
-        <Button title="연결 끊기" onPress={() => handleApiRequest('/unlink')} />
-      </View>
-      <Text style={styles.sectionTitle}>API 응답 결과</Text>
-      <Text style={styles.responseBox}>{responseText}</Text>
-    </ScrollView>
+    <View style={styles.container}>
+      <Image source={{ uri: properties?.profile_image }} style={styles.avatar} />
+      <Text style={styles.name}>👋 {properties?.nickname} 님</Text>
+      <Text>📧 {kakao_account?.email}</Text>
+      <Button title="로그아웃" onPress={() => {
+        fetch(`${BACKEND_DOMAIN}/logout`).then(() => router.replace("/login"));
+      }} />
+    </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
-  title: { fontSize: 22, fontWeight: 'bold', marginBottom: 20, textAlign: 'center' },
-  sectionTitle: { fontSize: 16, fontWeight: '600', marginVertical: 12 },
-  statusSection: { alignItems: 'center', marginVertical: 12 },
-  buttonGroup: { gap: 10, marginBottom: 20 },
-  responseBox: { minHeight: 80, borderColor: '#ccc', borderWidth: 1, padding: 10, fontSize: 14, textAlignVertical: 'top' },
+  container: { flex: 1, alignItems: "center", justifyContent: "center" },
+  avatar: { width: 100, height: 100, borderRadius: 50, marginBottom: 10 },
+  name: { fontSize: 20, fontWeight: "bold", marginBottom: 5 },
 });
+
+export default Main;

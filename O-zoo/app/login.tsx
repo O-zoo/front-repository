@@ -1,51 +1,31 @@
-import React from 'react';
-import { View, Button, StyleSheet, Linking, Platform } from 'react-native';
-import * as LinkingExpo from 'expo-linking';
-import { useRouter } from 'expo-router';
+import React from "react";
+import { Button, View, StyleSheet, Image } from "react-native";
+import * as Linking from "expo-linking";
 
-export default function LoginScreen() {
-  const router = useRouter();
+const BACKEND_DOMAIN = "https://o-zoo-back.onrender.com";
 
-  // 카카오 로그인 처리 함수
-  const handleKakaoLogin = async () => {
-    const kakaoLoginUrl = 'https://o-zoo-back.onrender.com/authorize';
-
-    // 모바일 브라우저로 카카오 로그인 플로우 시작
-    await Linking.openURL(kakaoLoginUrl);
+const Login = () => {
+  const signInWithKakao = () => {
+    // 백엔드 API에서 카카오 OAuth2 인증 시작
+    Linking.openURL(`${BACKEND_DOMAIN}/authorize`);
   };
-
-  // 딥링크 처리
-  React.useEffect(() => {
-    const handleDeepLink = (event: { url: string }) => {
-      const { queryParams } = LinkingExpo.parse(event.url);
-      if (queryParams?.login === 'success' && queryParams?.token) {
-        // 로그인 성공: main 화면으로 이동
-        router.replace({
-          pathname: '/main',
-          params: {
-            login: 'success',
-            token: queryParams.token,
-          },
-        } as any);
-      }
-    };
-
-    // 이벤트 리스너 등록
-    const sub = Linking.addEventListener('url', handleDeepLink);
-    // 앱이 백그라운드에서 시작될 경우 대응
-    Linking.getInitialURL().then(url => {
-      if (url) handleDeepLink({ url });
-    });
-    return () => sub.remove();
-  }, [router]);
 
   return (
     <View style={styles.container}>
-      <Button title="카카오 로그인" onPress={handleKakaoLogin} />
+      <Image
+        source={{
+          uri: "https://developers.kakao.com/assets/img/about/logos/kakaolink/kakaolink_btn_medium.png",
+        }}
+        style={styles.logo}
+      />
+      <Button title="카카오 로그인" onPress={signInWithKakao} />
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', padding: 20, backgroundColor: '#fff' },
+  container: { flex: 1, justifyContent: "center", alignItems: "center" },
+  logo: { width: 200, height: 50, marginBottom: 20 },
 });
+
+export default Login;
