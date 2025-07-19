@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, Image, Button, StyleSheet } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const BACKEND_DOMAIN = "https://o-zoo-back.onrender.com";
 
@@ -13,6 +14,10 @@ const Main = () => {
 
   useEffect(() => {
     if (!token) return;
+    if (params.login === "success" && typeof token === "string") {
+      // 로그인 성공
+      AsyncStorage.setItem("kakao_access_token", token);
+    }
 
     // Express 백엔드의 /profile 엔드포인트에서 사용자 정보 불러오기
     fetch(`${BACKEND_DOMAIN}/profile`, {
@@ -38,7 +43,8 @@ const Main = () => {
       <Image source={{ uri: properties?.profile_image }} style={styles.avatar} />
       <Text style={styles.name}>👋 {properties?.nickname} 님</Text>
       <Text>📧 {kakao_account?.email}</Text>
-      <Button title="로그아웃" onPress={() => {
+      <Button title="로그아웃" onPress={async () => {
+        await AsyncStorage.removeItem("kakao_access_token");
         fetch(`${BACKEND_DOMAIN}/logout`).then(() => router.replace("/login"));
       }} />
     </View>
