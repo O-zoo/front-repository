@@ -15,7 +15,7 @@ const Footer = ({ navigation, style }) =>{
     ];
 
     return (
-        <View style={{...style, width: '100%', flexDirection: 'row', backgroundColor: "#01112B"}}>
+        <View style={{...style, width: '100%', flexDirection: 'row', backgroundColor: "#01112B", marginBottom:50}}>
             {tabs.map((tab) => (
                 <Pressable
                     key={tab.key}

@@ -2,13 +2,13 @@ import React from 'react';
 import { Text, StyleSheet, TextProps, TextStyle } from 'react-native';
 
 interface CustomTextProps extends TextProps {
-  children: React.ReactNode;       // 텍스트나 컴포넌트가 children으로 올 수 있음
-  style?: TextStyle;               // style은 선택적이며, TextStyle 타입
+  children: React.ReactNode;
+  style?: TextStyle;
 }
 
 const styles = StyleSheet.create({
   text: {
-    fontFamily: 'Cafe24Ssurround-v2.0.ttf',
+    fontFamily: 'Cafe24Ssurround', // App.tsx에서 로드한 이름
   },
 });
 
