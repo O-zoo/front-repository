@@ -73,8 +73,9 @@ const Main = () => {
         <Text style={{fontSize:20, marginTop:20}}>생일을 입력해주세요.</Text>
         <Pressable style={styles.dateButton} onPress={showDatePicker}>
           <Text style={styles.dateButtonText}>
-            {birthday ? birthday.toLocaleDateString() : "생일 선택"}
+            {birthday ? birthday.toLocaleDateString() : "생일 선택하기"}
           </Text>
+          <Text style={{color:"gray"}}>▼</Text>
         </Pressable>
 
         <DateTimePickerModal
@@ -84,10 +85,16 @@ const Main = () => {
           onCancel={hideDatePicker}
         />
 
-        <Button title="로그아웃" onPress={async () => {
+        <Pressable style={styles.HomeButton} onPress={() => router.push("/home/Home")}>
+          <Text style={styles.buttonText}>완료</Text>
+        </Pressable>
+
+        <Pressable style={styles.button} onPress={async () =>{
           await AsyncStorage.removeItem("kakao_access_token");
           fetch(`${BACKEND_DOMAIN}/logout`).then(() => router.replace("/login"));
-        }} />
+        }}>
+          <Text style={styles.buttonText}>로그아웃</Text>
+        </Pressable>
       </View>
 
 
@@ -111,11 +118,22 @@ const styles = StyleSheet.create({
   avatar: { width: 70, height: 70, borderRadius: 50, marginBottom: 10 },
   name: { fontSize: 20, fontWeight: "bold", marginBottom: 20, color:"#fff" },
   button: {
+    backgroundColor: "#FFF",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    alignItems: "center",
+    marginTop:10,
+    borderColor:"#939393",
+    borderWidth:1,
+  },
+  HomeButton: {
     backgroundColor: "#FFCC00",
     paddingVertical: 10,
     paddingHorizontal: 20,
-    borderRadius: 8,
+    borderRadius: 10,
     alignItems: "center",
+    marginTop:30,
   },
   buttonText: {
     color: "#000",
@@ -128,7 +146,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     paddingHorizontal: 10,
     borderRadius: 5,
-    color:"#fff",
+    marginTop:5,
+    color:"#000",
   },
   CustomBox: {
     padding: 30,
@@ -138,14 +157,20 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 10,
   },
   dateButton: {
-    marginTop: 10,
-    padding: 10,
-    backgroundColor: "#FFCC00",
+    height: 40,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    paddingHorizontal: 10,
     borderRadius: 5,
+    color:"#fff",
+    padding:8,
+    justifyContent: "space-between",
+    flexDirection:"row",
     alignItems: "center",
+    marginTop:5,
   },
   dateButtonText: {
-    fontSize: 16,
-    color: "#000",
+    fontSize: 13,
+    color: "gray",
   },
 });
