@@ -92,7 +92,7 @@ const Main = () => {
 
 
 
-      <Pressable style={styles.button} onPress={() => router.push("/home/Home")}>
+      <Pressable style={styles.button} onPress={() => router.push("./home/Home")}>
         <Text style={styles.buttonText}>홈으로 가기</Text>
       </Pressable>
     </View>
