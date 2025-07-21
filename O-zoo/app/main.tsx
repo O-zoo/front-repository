@@ -95,13 +95,13 @@ const Main = () => {
         }}>
           <Text style={styles.buttonText}>로그아웃</Text>
         </Pressable>
-
-
-        {/* <Button title="로그아웃" onPress={async () => {
-          await AsyncStorage.removeItem("kakao_access_token");
-          fetch(`${BACKEND_DOMAIN}/logout`).then(() => router.replace("/login"));
-        }} /> */}
       </View>
+
+
+
+      <Pressable style={styles.button} onPress={() => router.push("./home/Home")}>
+        <Text style={styles.buttonText}>홈으로 가기</Text>
+      </Pressable>
     </View>
     </ImageBackground>
   );
