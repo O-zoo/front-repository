@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { Button, Image, ImageBackground, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Image, ImageBackground, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 
 const BACKEND_DOMAIN = "https://o-zoo-back.onrender.com";
