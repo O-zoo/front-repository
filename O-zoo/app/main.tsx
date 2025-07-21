@@ -6,7 +6,7 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 
 const BACKEND_DOMAIN = "https://o-zoo-back.onrender.com";
 
-const Main = () => {
+const Main = async () => {
   const router = useRouter();
   const params = useLocalSearchParams();
   const [profile, setProfile] = useState<any>(null);
@@ -14,13 +14,40 @@ const Main = () => {
   const [birthday, setBirthday] = useState<Date | null>(null); // 생일 상태
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false); // 모달 상태
 
-  const token = typeof params.token === "string" ? params.token : null;
+  var token = typeof params.token === "string" ? params.token : null;
+  const refreshToken = typeof params.refresh === "string" ? params.refresh : null;
+  const expires_in = 7200;
+
+  const now = Date.now();
+  const tokenExpiresAt = parseInt(await AsyncStorage.getItem("token_expires_at") || "0");
+
+  if (now>tokenExpiresAt) {
+    fetch(`${BACKEND_DOMAIN}/refresh`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+          refreshToken: refreshToken,
+        }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        const new_token = data.access_token;
+        token = new_token;
+        AsyncStorage.setItem("kakao_access_token", new_token);
+      })
+      .catch(() => setProfile(null));
+  }
 
   useEffect(() => {
     if (!token) return;
     if (params.login === "success" && typeof token === "string") {
       // 로그인 성공
       AsyncStorage.setItem("kakao_access_token", token);
+      if (typeof refreshToken === "string") {
+        AsyncStorage.setItem("kakao_refresh_token", refreshToken);
+        AsyncStorage.setItem("token_expires_at", String(Date.now() + expires_in * 1000));
+      }
     }
 
     // Express 백엔드의 /profile 엔드포인트에서 사용자 정보 불러오기
@@ -38,15 +65,50 @@ const Main = () => {
     return <Text>사용자 정보를 불러오는 중...</Text>;
   }
   console.log(profile);
-  
 
-  const { properties, kakao_account } = profile;
+  const { id, properties, kakao_account } = profile;
 
   const showDatePicker = () => setDatePickerVisibility(true);
   const hideDatePicker = () => setDatePickerVisibility(false);
   const handleConfirm = (date: Date) => {
     setBirthday(date);
     hideDatePicker();
+  };
+
+  const registerUser = async () => {
+    if (!text || !birthday) {
+      alert("닉네임과 생일을 모두 입력해주세요.");
+      return;
+    }
+    console.log(`name:${text}, birth:${birthday}`);
+
+    try {
+      const response = await fetch(`${BACKEND_DOMAIN}/api/user/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: id,
+          name: text,
+          birth: birthday.toISOString().split('T')[0], // 'YYYY-MM-DD' 포맷
+          profile_img: properties.profile_image,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        alert("등록 성공! 🎉");
+        // 필요한 경우 다음 화면 이동
+        router.push("/home/Home");
+      } else {
+        alert("등록 실패😢: " + result.message || "알 수 없는 오류");
+      }
+    } catch (error) {
+      console.error("등록 중 오류 발생:", error);
+      alert("네트워크 오류가 발생했습니다.");
+    }
   };
 
   return (
@@ -67,6 +129,7 @@ const Main = () => {
         <TextInput
           style={styles.input}
           placeholder="예: 잔망정인"
+          placeholderTextColor="gray"
           value={text}
           onChangeText={setText}
         />
@@ -85,7 +148,10 @@ const Main = () => {
           onCancel={hideDatePicker}
         />
 
-        <Pressable style={styles.HomeButton} onPress={() => router.push("/home/Home")}>
+        <Pressable style={styles.HomeButton} onPress={() => {
+          registerUser;
+          router.push("/home/Home");
+        }}>
           <Text style={styles.buttonText}>완료</Text>
         </Pressable>
 
@@ -96,12 +162,6 @@ const Main = () => {
           <Text style={styles.buttonText}>로그아웃</Text>
         </Pressable>
       </View>
-
-
-
-      <Pressable style={styles.button} onPress={() => router.push("./home/Home")}>
-        <Text style={styles.buttonText}>홈으로 가기</Text>
-      </Pressable>
     </View>
     </ImageBackground>
   );
