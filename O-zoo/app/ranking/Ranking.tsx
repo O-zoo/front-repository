@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { FlatList, Image, ImageBackground, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import Footer from '../../components/Footer';
 
 const allRanking = [
@@ -20,6 +21,8 @@ const friendRanking = [
 
 const Ranking = ({ navigation }) => {
   const [selectedTab, setSelectedTab] = useState<'all' | 'friend'>('all');
+  const router = useRouter();
+  const params = useLocalSearchParams();
 
   const renderItem = ({ item, index }: { item: any; index: number }) => {
     let rankIcon;
@@ -51,9 +54,9 @@ const Ranking = ({ navigation }) => {
       style={styles.background}
     >
 
-    <Pressable style={styles.homeButton} onPress={() => navigation.navigate('Home')}>
-      <Text style={styles.homeButtonText}>홈으로 돌아가기</Text>
-    </Pressable>
+      <Pressable style={styles.homeButton} onPress={() => { router.push("/home/Home");}}>
+        <Text style={styles.homeButtonText}>홈으로 돌아가기</Text> 
+      </Pressable>
 
       <View style={styles.container}>
         {/* 탭 버튼 */}
@@ -109,9 +112,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   container: {
-    marginTop: 30,
+    marginTop: 90,
     width: 330,
-    height: 500, 
+    height: 520, 
     backgroundColor: '#fff',
     borderRadius: 10,
     paddingBottom: 20,

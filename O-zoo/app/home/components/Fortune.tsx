@@ -57,6 +57,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     alignItems: 'center',
     paddingBottom: 20,
+    marginBottom:60,
   },
   title: {
     position: 'absolute',
@@ -76,6 +77,8 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     marginTop: 50,
+    position:'absolute',
+    bottom:5,
     paddingVertical: 5,
     paddingHorizontal: 15,
     backgroundColor: 'rgba(0,0,0,0.6)',

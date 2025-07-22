@@ -1,14 +1,10 @@
 import React, { useState } from 'react';
-import {
-  Image,
-  ImageBackground,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-  FlatList,
-} from 'react-native';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Image, ImageBackground, Pressable, StyleSheet, Text, View, FlatList } from 'react-native';
 import Footer from '../../components/Footer';
+import ING from './components/ING';
+import WIN from './components/WIN';
+import LOSE from './components/LOSE';
 
 const recordsData = [
   { id: '1', status: 'win', name: '내기 이름', date: '2025.07.18', members: ['김ㅇㅇ', '이ㅇㅇ'] },
@@ -25,6 +21,15 @@ const ongoingData = [
 
 const RecordsScreen = ({ navigation }) => {
   const [selectedTab, setSelectedTab] = useState<'ongoing' | 'all'>('ongoing');
+  const [selectedModal, setSelectedModal] = useState<'ING' | 'WIN' | 'LOSE' | null>(null);
+  const router = useRouter();
+  const params = useLocalSearchParams();
+
+  const handleItemPress = (status: string) => {
+    if (status === 'ongoing') setSelectedModal('ING');
+    else if (status === 'win') setSelectedModal('WIN');
+    else if (status === 'lose') setSelectedModal('LOSE');
+  };
 
   const renderItem = ({ item }: { item: any }) => {
     const icon =
@@ -35,7 +40,7 @@ const RecordsScreen = ({ navigation }) => {
         : require('../../assets/icons/ongoing.png');
 
     return (
-      <View style={styles.item}>
+      <Pressable onPress={() => handleItemPress(item.status)} style={styles.item}>
         <Image source={icon} style={styles.statusIcon} resizeMode="contain" />
         <View style={styles.itemInfo}>
           <Text style={styles.itemName}>{item.name}</Text>
@@ -48,7 +53,7 @@ const RecordsScreen = ({ navigation }) => {
             </Text>
           ))}
         </View>
-      </View>
+      </Pressable>
     );
   };
 
@@ -58,6 +63,12 @@ const RecordsScreen = ({ navigation }) => {
       style={styles.background}
       resizeMode="cover"
     >
+      {/* 홈으로 돌아가기 */}
+      <Pressable style={styles.homeButton} onPress={() => router.push('/home/Home')}>
+        <Text style={styles.homeButtonText}>홈으로 돌아가기</Text>
+      </Pressable>
+
+      {/* 메인 박스 */}
       <View style={styles.box}>
         {/* 탭 버튼 */}
         <View style={styles.tabContainer}>
@@ -89,6 +100,11 @@ const RecordsScreen = ({ navigation }) => {
         />
       </View>
 
+      {/* 모달 */}
+      {selectedModal === 'ING' && <ING visible={true} onClose={() => setSelectedModal(null)} />}
+      {selectedModal === 'WIN' && <WIN visible={true} onClose={() => setSelectedModal(null)} />}
+      {selectedModal === 'LOSE' && <LOSE visible={true} onClose={() => setSelectedModal(null)} />}
+
       <Footer navigation={navigation} style={{ position: 'absolute', bottom: 0 }} />
     </ImageBackground>
   );
@@ -102,18 +118,34 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 30,
   },
+  homeButton: {
+    position: 'absolute',
+    top: 40, // 상태바 높이 감안
+    left: 20,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    zIndex: 10,
+  },
+  homeButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
   box: {
     width: 330,
     height: 500,
     backgroundColor: '#fff',
     borderRadius: 10,
     overflow: 'hidden',
+    marginTop: 60,
   },
   tabContainer: {
     flexDirection: 'row',
     height: 40,
     borderTopLeftRadius: 10,
-    borderTopRightRadius:10,
+    borderTopRightRadius: 10,
     marginBottom: 10,
     overflow: 'hidden',
     borderColor: '#ddd',

@@ -28,14 +28,6 @@ const HomeScreen = ({ navigation }) => {
         </CustomText>
       </View>
 
-      <Pressable onPress={() => router.push("../ranking/Ranking")}>
-        <Text style={{color:'white'}}>일단랭킹보기</Text>
-      </Pressable>
-
-      <Pressable onPress={() => router.push("../records/Records")}>
-        <Text style={{color:'white'}}>일단기록보기</Text>
-      </Pressable>
-
       {/* 닉네임 + 편집 아이콘 */}
       <View style={styles.nicknameWrapper}>
         <Pressable onPress={() => setMyPageVisible(true)} style={styles.nicknameRow}>
@@ -52,7 +44,7 @@ const HomeScreen = ({ navigation }) => {
       <Pressable style={styles.eggContainer} onPress={() => setFortuneVisible(true)}>
         <Image
           source={require('../../assets/images/egg.png')}
-          style={{ width: 250, marginBottom: 180 }}
+          style={{ width: 300, marginBottom: 180 }}
           resizeMode="contain"
         />
       </Pressable>
@@ -95,7 +87,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
   },
   headerTextContainer: {
-    marginTop: 40,
+    marginTop: 80,
     marginBottom:15,
     height:50,
     paddingHorizontal: 40,
@@ -115,7 +107,7 @@ const styles = StyleSheet.create({
   },
   nicknameText: {
     color: '#fff',
-    fontSize: 25,
+    fontSize: 30,
     fontWeight: 'bold',
     marginRight: 6,
   },
@@ -136,5 +128,6 @@ const styles = StyleSheet.create({
   nicknameRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    padding:  10,
   },
 });
