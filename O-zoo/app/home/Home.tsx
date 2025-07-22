@@ -12,7 +12,7 @@ const HomeScreen = ({ navigation }) => {
   const [myPageVisible, setMyPageVisible] = useState(false);
   const [fortuneVisible, setFortuneVisible] = useState(false); // Fortune 모달 상태
   const [nickname] = useState('은챙이');
-  
+
   const router = useRouter();
   const params = useLocalSearchParams();
 
@@ -30,6 +30,10 @@ const HomeScreen = ({ navigation }) => {
 
       <Pressable onPress={() => router.push("../ranking/Ranking")}>
         <Text style={{color:'white'}}>일단랭킹보기</Text>
+      </Pressable>
+
+      <Pressable onPress={() => router.push("../records/Records")}>
+        <Text style={{color:'white'}}>일단기록보기</Text>
       </Pressable>
 
       {/* 닉네임 + 편집 아이콘 */}

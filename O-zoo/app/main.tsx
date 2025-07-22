@@ -96,12 +96,6 @@ const Main = () => {
           <Text style={styles.buttonText}>로그아웃</Text>
         </Pressable>
       </View>
-
-
-
-      <Pressable style={styles.button} onPress={() => router.push("./home/Home")}>
-        <Text style={styles.buttonText}>홈으로 가기</Text>
-      </Pressable>
     </View>
     </ImageBackground>
   );

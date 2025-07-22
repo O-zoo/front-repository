@@ -76,6 +76,14 @@ const NewGame: React.FC<NewGameProps> = ({ visible, onClose }) => {
             multiline
           />
 
+          <Text style={styles.label}>누구와 함께하나요?</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="심승훈"
+            value={text}
+            onChangeText={setText}
+          />
+
           <Text style={styles.label}>기한을 설정해주세요</Text>
           <Pressable style={styles.dateButton} onPress={showDatePicker}>
             <Text style={styles.dateButtonText}>
@@ -142,7 +150,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 20,
-    marginTop: 17,
+    marginTop: 10,
     marginBottom: 5,
     color: '#000',
     alignSelf: 'flex-start',
@@ -153,7 +161,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     paddingHorizontal: 10,
     borderRadius: 5,
-    marginTop: 5,
+    marginTop: 3,
     color: "#000",
     width: "100%",
   },
@@ -183,7 +191,7 @@ const styles = StyleSheet.create({
     borderColor: '#eee',
   },
   betButtonText: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#333',
   },
   closeButton: {

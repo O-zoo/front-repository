@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
   container: {
     marginTop: 30,
     width: 330,
-    height: 500, // 박스 높이 고정
+    height: 500, 
     backgroundColor: '#fff',
     borderRadius: 10,
     paddingBottom: 20,
@@ -114,10 +114,9 @@ const styles = StyleSheet.create({
   },
   tabUnselected: {
     backgroundColor: '#FFD700', // 노란색
-    
   },
   tabText: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: 'bold',
     color: '#000',
   },
