@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useId, useState } from 'react';
 import { View, Text, TextInput, Pressable, Button, Image, ImageBackground, StyleSheet, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -103,6 +103,8 @@ const Main = () => {
         });
         if (!res.ok) throw new Error("프로필 정보를 불러오지 못했습니다.");
         const prof = await res.json();
+        await AsyncStorage.setItem("id", String(prof.id));
+        await AsyncStorage.setItem("profile_img", prof.properties.profile_image);
         setProfile(prof);
       } catch (e) {
         setProfile(null);
@@ -119,17 +121,26 @@ const Main = () => {
       Alert.alert("입력 필요", "닉네임과 생일 모두 입력해주세요.");
       return;
     }
+    console.log("got name & birth")
     try {
       const tokenValue = await AsyncStorage.getItem("kakao_access_token");
+      const userId = await AsyncStorage.getItem("id");
+      const userImg = await AsyncStorage.getItem("profile_img");
       const res = await fetch(`${BACKEND_DOMAIN}/api/user/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${tokenValue}`,
         },
-        body: JSON.stringify({ nickname: text, birthday: birthday.toISOString().split('T')[0] }),
+        body: JSON.stringify({
+          id: userId,
+          name: text,
+          profile_img: userImg,
+          birth: birthday.toISOString().split('T')[0] 
+        }),
       });
       const result = await res.json();
+      console.log(`got res from register user, ${result}`)
       if (res.ok) {
         Alert.alert('등록 성공', '회원등록이 완료되었습니다!');
         router.push("/home/Home");
@@ -213,7 +224,7 @@ const Main = () => {
         />
 
         <Pressable style={styles.HomeButton} onPress={() => {
-          registerUser;
+          registerUser();
           router.push("/home/Home");
         }}>
           <Text style={styles.buttonText}>완료</Text>
