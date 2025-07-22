@@ -9,9 +9,13 @@ export default function Index() {
   useEffect(() => {
     const task = InteractionManager.runAfterInteractions(async () => {
       try {
-        console.log("trying auto login")
         const token = await AsyncStorage.getItem("kakao_access_token");
-        if (token) {
+        const name = await AsyncStorage.getItem("userName");
+        if(name){
+          console.log(`got name : ${name}`);
+          router.replace(`/home/Home`);
+        }
+        else if (token) {
           // 자동 로그인 처리
           console.log(`got token : ${token}`)
           router.replace(`/main?token=${encodeURIComponent(token)}`);
