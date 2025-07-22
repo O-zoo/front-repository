@@ -3,10 +3,14 @@ import { View, Text, TextInput, Pressable, Button, Image, ImageBackground, Style
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import { useFonts } from 'expo-font';
 
 const BACKEND_DOMAIN = "https://o-zoo-back.onrender.com";
 
 const Main = () => {
+  const [fontsLoaded] = useFonts({
+      'Cafe24Ssurround': require('../assets/fonts/Cafe24Ssurround-v2.0.ttf'),
+    });
   const router = useRouter();
   const params = useLocalSearchParams();
 
@@ -121,7 +125,6 @@ const Main = () => {
       Alert.alert("입력 필요", "닉네임과 생일 모두 입력해주세요.");
       return;
     }
-    console.log("got name & birth")
     try {
       const tokenValue = await AsyncStorage.getItem("kakao_access_token");
       const userId = await AsyncStorage.getItem("id");
@@ -140,9 +143,10 @@ const Main = () => {
         }),
       });
       const result = await res.json();
-      console.log(`got res from register user, ${result}`)
-      if (res.ok) {
+      if (result.success) {
         Alert.alert('등록 성공', '회원등록이 완료되었습니다!');
+        await AsyncStorage.setItem("userName", text);
+        await AsyncStorage.setItem("userBirth", birthday.toISOString().split('T')[0]);
         router.push("/home/Home");
       } else {
         Alert.alert('등록 실패', result.message || "에러가 발생했습니다.");
@@ -168,6 +172,10 @@ const Main = () => {
           await AsyncStorage.removeItem("kakao_access_token");
           await AsyncStorage.removeItem("kakao_refresh_token");
           await AsyncStorage.removeItem("token_expires_at");
+          await AsyncStorage.removeItem("userName");
+          await AsyncStorage.removeItem("id");
+          await AsyncStorage.removeItem("profile_img");
+          await AsyncStorage.removeItem("userBirth");
           fetch(`${BACKEND_DOMAIN}/logout`).then(() => router.replace("/login"));
         }}
       >
@@ -185,6 +193,11 @@ const Main = () => {
     setBirthday(date);
     hideDatePicker();
   };
+  if (!fontsLoaded) {
+        return <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <Text style={{ fontSize: 16 }}>폰트를 불러오는 중입니다...</Text>
+        </View>;
+      }
 
   return (
     <ImageBackground
@@ -251,7 +264,7 @@ const styles = StyleSheet.create({
   },
   container: { flex: 1, alignItems: "center", justifyContent: "flex-start", marginTop:40 },
   avatar: { width: 70, height: 70, borderRadius: 50, marginBottom: 10 },
-  name: { fontSize: 20, fontWeight: "bold", marginBottom: 20, color:"#fff" },
+  name: { fontSize: 20, fontWeight: "bold", marginBottom: 20, color:"#fff",fontFamily: 'Cafe24Ssurround' },
   button: {
     backgroundColor: "#FFF",
     paddingVertical: 10,
