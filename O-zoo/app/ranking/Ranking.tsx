@@ -50,6 +50,11 @@ const Ranking = ({ navigation }) => {
       source={require('../../assets/images/background.png')}
       style={styles.background}
     >
+
+    <Pressable style={styles.homeButton} onPress={() => navigation.navigate('Home')}>
+      <Text style={styles.homeButtonText}>홈으로 돌아가기</Text>
+    </Pressable>
+
       <View style={styles.container}>
         {/* 탭 버튼 */}
         <View style={styles.tabContainer}>
@@ -87,6 +92,21 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-start',
     alignItems: 'center',
+  },
+  homeButton: {
+    position: 'absolute',
+    top: 40, // 상태바 높이 감안
+    left: 20,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    zIndex: 10,
+  },
+  homeButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: 'bold',
   },
   container: {
     marginTop: 30,

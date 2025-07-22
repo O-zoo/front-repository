@@ -39,7 +39,12 @@ const App = () => {
   // 폰트 로드가 완료되면 내비게이션 컨테이너를 렌더링합니다.
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home">
+      <Stack.Navigator
+        initialRouteName="Home"
+        screenOptions={{
+          headerShown: false,
+        }}
+      >
         <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Ranking" component={RankingScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Records" component={RecordsScreen} options={{ headerShown: false }} />
