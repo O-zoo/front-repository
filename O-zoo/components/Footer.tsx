@@ -1,25 +1,23 @@
-import { useNavigation, useRoute } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useRouter, usePathname } from 'expo-router';
 import React, { useEffect } from 'react';
 import { Image, Pressable, StyleSheet, View } from 'react-native';
-import { RootStackParamList } from '../navigationTypes';
 import tabTypeZustand from '../store/tabType';
 import CustomText from './CustomText';
 
-// 네비게이션 타입 정의
-type NavigationProps = NativeStackNavigationProp<RootStackParamList>;
+
 
 const Footer = ({ style }: { style?: object }) => {
-  const navigation = useNavigation<NavigationProps>();
-  const route = useRoute();
+  const router = useRouter();
+  const pathname = usePathname();
   const tabType = tabTypeZustand((state) => state.tabType);
   const setTabType = tabTypeZustand((state) => state.setTabType);
 
   useEffect(() => {
-    if (['Records', 'Select', 'Ranking'].includes(route.name as string)) {
-      setTabType(route.name as string);
+    const path = pathname.split("/").pop() || '';
+    if (['Records', 'Select', 'Ranking'].includes(path)) {
+      setTabType(path);
     }
-  }, [route.name]);
+  }, [pathname]);
 
   return (
     <View style={[styles.container, style]}>
@@ -28,7 +26,7 @@ const Footer = ({ style }: { style?: object }) => {
         style={styles.tab}
         onPress={() => {
           setTabType('Records');
-          navigation.navigate('Records');
+          router.push("/records/Records")
         }}
       >
         <Image
@@ -45,7 +43,7 @@ const Footer = ({ style }: { style?: object }) => {
         style={styles.tab}
         onPress={() => {
           setTabType('Select');
-          navigation.navigate('Select');
+          router.push("/select/Select")
         }}
       >
         <Image
@@ -62,7 +60,7 @@ const Footer = ({ style }: { style?: object }) => {
         style={styles.tab}
         onPress={() => {
           setTabType('Ranking');
-          navigation.navigate('Ranking');
+          router.push("/ranking/Ranking")
         }}
       >
         <Image

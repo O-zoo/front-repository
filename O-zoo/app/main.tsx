@@ -1,114 +1,178 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
-import { Image, ImageBackground, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
-import DateTimePickerModal from "react-native-modal-datetime-picker";
+import React, { useEffect, useState } from 'react';
+import { View, Text, TextInput, Pressable, Button, Image, ImageBackground, StyleSheet, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
 const BACKEND_DOMAIN = "https://o-zoo-back.onrender.com";
 
-const Main = async () => {
+const Main = () => {
   const router = useRouter();
   const params = useLocalSearchParams();
+
+  // 핵심 상태들 useState로 관리
+  const [token, setToken] = useState<string | null>(null);
+  const [refreshToken, setRefreshToken] = useState<string | null>(null);
+  const [tokenExpiresAt, setTokenExpiresAt] = useState<number>(0);
   const [profile, setProfile] = useState<any>(null);
   const [text, setText] = useState('');
-  const [birthday, setBirthday] = useState<Date | null>(null); // 생일 상태
-  const [isDatePickerVisible, setDatePickerVisibility] = useState(false); // 모달 상태
+  const [birthday, setBirthday] = useState<Date | null>(null);
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  var token = typeof params.token === "string" ? params.token : null;
-  const refreshToken = typeof params.refresh === "string" ? params.refresh : null;
-  const expires_in = 7200;
-
-  const now = Date.now();
-  const tokenExpiresAt = parseInt(await AsyncStorage.getItem("token_expires_at") || "0");
-
-  if (now>tokenExpiresAt) {
-    fetch(`${BACKEND_DOMAIN}/refresh`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-          refreshToken: refreshToken,
-        }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        const new_token = data.access_token;
-        token = new_token;
-        AsyncStorage.setItem("kakao_access_token", new_token);
-      })
-      .catch(() => setProfile(null));
-  }
-
+  // URL 파라미터반영 → AsyncStorage와 싱크
   useEffect(() => {
-    if (!token) return;
-    if (params.login === "success" && typeof token === "string") {
-      // 로그인 성공
-      AsyncStorage.setItem("kakao_access_token", token);
-      if (typeof refreshToken === "string") {
-        AsyncStorage.setItem("kakao_refresh_token", refreshToken);
-        AsyncStorage.setItem("token_expires_at", String(Date.now() + expires_in * 1000));
+    const initialize = async () => {
+      try {
+        let urlToken = typeof params.token === 'string' ? params.token : null;
+        let urlRefresh = typeof params.refresh === 'string' ? params.refresh : null;
+        let urlExpires = typeof params.expires_in === 'string' ? parseInt(params.expires_in) : null;
+
+        // AsyncStorage에서 기존 값 불러옴
+        const storedToken = await AsyncStorage.getItem("kakao_access_token");
+        const storedRefresh = await AsyncStorage.getItem("kakao_refresh_token");
+        const storedExpiresAt = await AsyncStorage.getItem("token_expires_at");
+
+        // URL 파라미터 및 AsyncStorage의 최신값 반영
+        const newToken = urlToken || storedToken;
+        const newRefresh = urlRefresh || storedRefresh;
+        const newExpiresAt = urlExpires
+          ? Date.now() + urlExpires * 1000
+          : storedExpiresAt
+            ? parseInt(storedExpiresAt)
+            : 0;
+        console.log(newExpiresAt);
+
+        setToken(newToken);
+        setRefreshToken(newRefresh);
+        setTokenExpiresAt(newExpiresAt);
+
+        // 저장
+        if (newToken) await AsyncStorage.setItem("kakao_access_token", newToken);
+        if (newRefresh) await AsyncStorage.setItem("kakao_refresh_token", newRefresh);
+        if (newExpiresAt) await AsyncStorage.setItem("token_expires_at", String(newExpiresAt));
+      } catch (e) {
+        console.log("초기화 에러:", e);
       }
+    };
+    initialize();
+  }, [params.token, params.refresh, params.expires_in]); // 파라미터 변동 시 재실행
+
+  // 토큰 만료 관리 및 갱신→프로필 fetch
+  useEffect(() => {
+    const maintainAccessToken = async () => {
+      if (!token || !refreshToken) { setLoading(false); return; }
+      console.log("inside maintainAccessToken");
+      if (Date.now() > tokenExpiresAt) {
+        // 만료됨: refresh 시도
+        console.log(`expired! now : ${Date.now()}, expires : ${tokenExpiresAt}`);
+        try {
+          const res = await fetch(`${BACKEND_DOMAIN}/refresh`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ refreshToken }),
+          });
+          const data = await res.json();
+          if (data.access_token) {
+            console.log(`has access token : ${data.access_token}`);
+            setToken(data.access_token);
+            await AsyncStorage.setItem("kakao_access_token", data.access_token);
+            // expires_in 값도 반영
+            const updatedExpiresAt = Date.now() + (data.expires_in || 7199) * 1000;
+            setTokenExpiresAt(updatedExpiresAt);
+            await AsyncStorage.setItem("token_expires_at", String(updatedExpiresAt));
+          } else {
+            throw new Error("refresh 실패");
+          }
+        } catch (e) {
+          setProfile(null);
+          setLoading(false);
+          Alert.alert('재로그인 필요', '세션이 만료되었습니다. 다시 로그인 해주세요.');
+          router.replace('/login');
+          return;
+        }
+      }
+      // 프로필 fetch 시도
+      try {
+        setLoading(true);
+        const res = await fetch(`${BACKEND_DOMAIN}/profile`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) throw new Error("프로필 정보를 불러오지 못했습니다.");
+        const prof = await res.json();
+        setProfile(prof);
+      } catch (e) {
+        setProfile(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    maintainAccessToken();
+  }, [token, refreshToken, tokenExpiresAt]);
+
+  // 닉네임/생일 입력 및 등록 API
+  const registerUser = async () => {
+    if (!text || !birthday) {
+      Alert.alert("입력 필요", "닉네임과 생일 모두 입력해주세요.");
+      return;
     }
+    try {
+      const tokenValue = await AsyncStorage.getItem("kakao_access_token");
+      const res = await fetch(`${BACKEND_DOMAIN}/api/user/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${tokenValue}`,
+        },
+        body: JSON.stringify({ nickname: text, birthday: birthday.toISOString().split('T')[0] }),
+      });
+      const result = await res.json();
+      if (res.ok) {
+        Alert.alert('등록 성공', '회원등록이 완료되었습니다!');
+        router.push("/home/Home");
+      } else {
+        Alert.alert('등록 실패', result.message || "에러가 발생했습니다.");
+      }
+    } catch (e) {
+      Alert.alert('네트워크 오류', '등록 중 오류가 발생했습니다.');
+    }
+  };
 
-    // Express 백엔드의 /profile 엔드포인트에서 사용자 정보 불러오기
-    fetch(`${BACKEND_DOMAIN}/profile`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((res) => res.json())
-      .then(setProfile)
-      .catch(() => setProfile(null));
-  }, [token]);
-
-  if (!profile) {
+  // 렌더
+  if (loading) {
     return <Text>사용자 정보를 불러오는 중...</Text>;
   }
-  console.log(profile);
+  if (!profile) {
+    return (
+    <View style={styles.container}>
+      <Text style={{ fontSize: 16, marginBottom: 16 }}>
+        사용자 정보 조회 실패. 다시 로그인 해주세요.
+      </Text>
+      <Pressable
+        style={styles.button}
+        onPress={async () => {
+          await AsyncStorage.removeItem("kakao_access_token");
+          await AsyncStorage.removeItem("kakao_refresh_token");
+          await AsyncStorage.removeItem("token_expires_at");
+          fetch(`${BACKEND_DOMAIN}/logout`).then(() => router.replace("/login"));
+        }}
+      >
+        <Text style={styles.buttonText}>로그아웃</Text>
+      </Pressable>
+    </View>
+  );
+  }
 
-  const { id, properties, kakao_account } = profile;
-
+  const { properties } = profile;
+ 
   const showDatePicker = () => setDatePickerVisibility(true);
   const hideDatePicker = () => setDatePickerVisibility(false);
   const handleConfirm = (date: Date) => {
     setBirthday(date);
     hideDatePicker();
-  };
-
-  const registerUser = async () => {
-    if (!text || !birthday) {
-      alert("닉네임과 생일을 모두 입력해주세요.");
-      return;
-    }
-    console.log(`name:${text}, birth:${birthday}`);
-
-    try {
-      const response = await fetch(`${BACKEND_DOMAIN}/api/user/register`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          id: id,
-          name: text,
-          birth: birthday.toISOString().split('T')[0], // 'YYYY-MM-DD' 포맷
-          profile_img: properties.profile_image,
-        }),
-      });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        alert("등록 성공! 🎉");
-        // 필요한 경우 다음 화면 이동
-        router.push("/home/Home");
-      } else {
-        alert("등록 실패😢: " + result.message || "알 수 없는 오류");
-      }
-    } catch (error) {
-      console.error("등록 중 오류 발생:", error);
-      alert("네트워크 오류가 발생했습니다.");
-    }
   };
 
   return (

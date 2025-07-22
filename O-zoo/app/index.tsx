@@ -16,6 +16,7 @@ export default function Index() {
           console.log(`got token : ${token}`)
           router.replace(`/main?token=${encodeURIComponent(token)}`);
         } else {
+          //await AsyncStorage.removeItem("kakao_access_token");
           router.replace('/login');
         }
       } catch (error) {
