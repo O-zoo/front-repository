@@ -110,16 +110,6 @@ const NewGame: React.FC<NewGameProps> = ({ visible, onClose }) => {
     await Linking.openURL(url);
   };
 
-  /** 인스타 스토리 열기 */
-  const handleInstagramStory = async () => {
-    const url = 'instagram://story-camera'; 
-    const supported = await Linking.canOpenURL(url);
-    if (supported) {
-      await Linking.openURL(url);
-    } else {
-      Alert.alert('인스타그램 스토리를 열 수 없습니다.');
-    }
-  };
 
   const handleComplete = () => {
     Alert.alert("완료", "대결이 생성되었습니다!");
