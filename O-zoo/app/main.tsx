@@ -245,6 +245,12 @@ const Main = () => {
 
         <Pressable style={styles.button} onPress={async () =>{
           await AsyncStorage.removeItem("kakao_access_token");
+          await AsyncStorage.removeItem("kakao_refresh_token");
+          await AsyncStorage.removeItem("token_expires_at");
+          await AsyncStorage.removeItem("userName");
+          await AsyncStorage.removeItem("id");
+          await AsyncStorage.removeItem("profile_img");
+          await AsyncStorage.removeItem("userBirth");
           fetch(`${BACKEND_DOMAIN}/logout`).then(() => router.replace("/login"));
         }}>
           <Text style={styles.buttonText}>로그아웃</Text>

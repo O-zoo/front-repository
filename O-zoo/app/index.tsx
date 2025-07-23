@@ -14,6 +14,7 @@ export default function Index() {
         if(name){
           console.log(`got name : ${name}`);
           router.replace(`/home/Home`);
+          // router.replace(`/main`);
         }
         else if (token) {
           // 자동 로그인 처리
@@ -24,7 +25,7 @@ export default function Index() {
           router.replace('/login');
         }
       } catch (error) {
-        console.error('자동 로그인 처리 중 오류:', error);
+        console.error('자동 로그인 실패:', error);
         router.replace('/login');
       }
     });

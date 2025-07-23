@@ -76,7 +76,7 @@ const WIN: React.FC<WINProps> = ({ visible, onClose }) => {
 
           {/* 닫기 버튼 */}
           <Pressable style={styles.backButton} onPress={onClose}>
-            <Text style={styles.backButtonText}>돌아가기</Text>
+            <Text style={styles.backButtonText}>닫기</Text>
           </Pressable>
         </View>
       </View>

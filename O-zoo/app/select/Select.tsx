@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
-import { ImageBackground, StyleSheet, View, Pressable, Text, TextInput, ScrollView} from 'react-native';
+import { ImageBackground, StyleSheet, View, Pressable, Text, TextInput, ScrollView, Alert } from 'react-native'; // Alert 추가
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import CustomText from '../../components/CustomText';
 import Footer from '../../components/Footer';
+import { useFonts } from 'expo-font';
 
 const SelectScreen = () => {
+  const [fontsLoaded] = useFonts({
+    'Cafe24Ssurround': require('../../assets/fonts/Cafe24Ssurround-v2.0.ttf'),
+  });
   const router = useRouter();
   const params = useLocalSearchParams();
 
@@ -22,6 +26,27 @@ const SelectScreen = () => {
     setNames(updated);
   };
 
+  const handleGoTreasure = () => {
+    if (!selectedCount) {
+      Alert.alert("알림", "참여할 인원 수를 선택해주세요.");
+      return;
+    }
+    if (names.some(name => name.trim() === "")) {
+      Alert.alert("알림", "모든 이름을 입력해주세요.");
+      return;
+    }
+    router.push({
+      pathname: "/select/components/Treasure",
+      params: { names: JSON.stringify(names) },
+    });
+  };
+
+  if (!fontsLoaded) {
+    return <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <Text style={{ fontSize: 16 }}>폰트를 불러오는 중입니다...</Text>
+    </View>;
+  }
+
   return (
     <ImageBackground
       source={require('../../assets/images/background.png')}
@@ -29,12 +54,15 @@ const SelectScreen = () => {
       resizeMode="cover"
     >
       {/* 홈 버튼 */}
-      <Pressable style={styles.homeButton} onPress={() => { router.push("/home/Home");}}>
-        <Text style={styles.homeButtonText}>홈으로 돌아가기</Text> 
+      <Pressable style={styles.homeButton} onPress={() => { router.push("/home/Home"); }}>
+        <Text style={styles.homeButtonText}>홈으로 돌아가기</Text>
       </Pressable>
 
       {/* 메인 컨테이너 */}
-      <View style={styles.container}>
+        <ScrollView 
+          contentContainerStyle={styles.scrollContainer} 
+          keyboardShouldPersistTaps="handled"
+        >
         <CustomText style={styles.title}>몇 명이 뽑기에 참여하나요?</CustomText>
 
         {/* 1~6 토글 버튼 */}
@@ -68,11 +96,12 @@ const SelectScreen = () => {
             ))}
           </View>
         )}
+
         {/* 뽑으러가기 버튼 */}
-        <Pressable style={styles.submitButton}>
+        <Pressable style={styles.submitButton} onPress={handleGoTreasure}>
           <Text style={styles.submitButtonText}>뽑으러가기</Text>
         </Pressable>
-      </View>
+      </ScrollView>
       <Footer style={{ position: 'absolute', bottom: 0 }} />
     </ImageBackground>
   );
@@ -99,7 +128,12 @@ const styles = StyleSheet.create({
   homeButtonText: {
     color: '#fff',
     fontSize: 14,
-    fontWeight: 'bold',
+    fontFamily: 'Cafe24Ssurround',
+  },
+  scrollContainer: {
+    alignItems: 'center',
+    paddingTop: 140,
+    paddingBottom: 300,
   },
   container: {
     marginTop: 50,
@@ -108,7 +142,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontFamily: 'Cafe24Ssurround',
     color: '#fff',
     marginBottom: 20,
   },
@@ -133,7 +167,7 @@ const styles = StyleSheet.create({
   toggleText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: 'bold',
+    fontFamily: 'Cafe24Ssurround',
   },
   label: {
     fontSize: 14,
@@ -159,7 +193,7 @@ const styles = StyleSheet.create({
   },
   submitButtonText: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontFamily: 'Cafe24Ssurround',
     color: '#000',
   },
 });
