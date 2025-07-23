@@ -1,28 +1,72 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FlatList, Image, ImageBackground, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import Footer from '../../components/Footer';
+import { useFonts } from 'expo-font';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const allRanking = [
-  { id: '1', name: '은주연', score: 8080 },
-  { id: '2', name: '은초코', score: 8000 },
-  { id: '3', name: '심승훈', score: 7500 },
-  { id: '4', name: '론디기', score: 7000 },
-  { id: '5', name: '엘빈', score: 6000 },
-  { id: '6', name: 'ㅇㅇㅇ', score: 5500 },
-  { id: '7', name: 'ㅇㅇㅇ', score: 5300 },
-  { id: '8', name: 'ㅇㅇㅇ', score: 5000 },
-];
-
-const friendRanking = [
-  { id: '1', name: '은주연', score: 8080 },
-  { id: '2', name: '은초코', score: 8000 },
-];
-
-const Ranking = ({ navigation }) => {
+const Ranking = () => {
+  const [fontsLoaded] = useFonts({
+      'Cafe24Ssurround': require('../../assets/fonts/Cafe24Ssurround-v2.0.ttf'),
+    });
+    
   const [selectedTab, setSelectedTab] = useState<'all' | 'friend'>('all');
+  const [allRanking, setAllRanking] = useState([]);
+  const [friendRanking, setFriendRanking] = useState([]);
+  const [token, setToken] = useState('');
   const router = useRouter();
   const params = useLocalSearchParams();
+
+  const BACKEND_DOMAIN = "https://o-zoo-back.onrender.com";
+
+  useEffect(() => {
+    const loadAllRanking = async () => {
+      try {
+        const res = await fetch(`${BACKEND_DOMAIN}/api/top10`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+          const data = await res.json();
+          console.log(`got ranking data: ${data.top10}`);
+          setAllRanking(data.top10);
+      } catch (error) {
+        console.error('전체 랭킹 불러오기 에러:', error);
+      }
+    }
+    loadAllRanking();
+  }, []);
+
+  useEffect(() => {
+    const loadToken = async () => {
+      const kakao_token = await AsyncStorage.getItem('kakao_access_token');
+      if (kakao_token) {
+        setToken(kakao_token);
+        console.log(`got token : ${kakao_token}`);
+        loadFriendRanking(kakao_token);
+      } else {
+        console.error('토큰을 불러오는 데 실패했습니다.');
+      }
+    }
+    const loadFriendRanking = async (kakao_token:String) => {
+      try {
+        const res = await fetch(`${BACKEND_DOMAIN}/api/user/friendRankings`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${kakao_token}`,
+            },
+          });
+          const data = await res.json();
+          console.log(`got ranking data: ${data.rankings}`);
+          setFriendRanking(data.rankings);
+      } catch (error) {
+        console.error('친구 랭킹 불러오기 에러:', error);
+      }
+    }
+    loadToken();
+  }, []);
 
   const renderItem = ({ item, index }: { item: any; index: number }) => {
     let rankIcon;
@@ -39,7 +83,7 @@ const Ranking = ({ navigation }) => {
         {rankIcon ? (
           <Image source={rankIcon} style={styles.medalIcon} />
         ) : (
-          <Text style={styles.rankText}>{index + 1}</Text>
+          <Text style={styles.rankText}>{item.rank}</Text>
         )}
         <View style={styles.avatar} />
         <Text style={styles.name}>{item.name}</Text>
@@ -47,6 +91,12 @@ const Ranking = ({ navigation }) => {
       </View>
     );
   };
+
+  if (!fontsLoaded) {
+    return <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <Text style={{ fontSize: 16 }}>폰트를 불러오는 중입니다...</Text>
+    </View>;
+  }
 
   return (
     <ImageBackground
@@ -79,11 +129,11 @@ const Ranking = ({ navigation }) => {
         <FlatList
           data={selectedTab === 'all' ? allRanking : friendRanking}
           renderItem={renderItem}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.rank.toString()}
         />
       </View>
 
-      <Footer navigation={navigation} style={{ position: 'absolute', bottom: 0 }} />
+      <Footer style={{ position: 'absolute', bottom: 0 }} />
     </ImageBackground>
   );
 };

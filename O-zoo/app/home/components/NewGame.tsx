@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useEffect, useState } from 'react';
 import { Modal, View, Text, StyleSheet, Pressable, TextInput, Linking, Alert } from 'react-native';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 
@@ -8,8 +9,10 @@ interface NewGameProps {
 }
 
 const NewGame: React.FC<NewGameProps> = ({ visible, onClose }) => {
-  const [text, setText] = useState('');
+  const [name, setName] = useState('');
+  const [title, setTitle] = useState('');
   const [desc, setDesc] = useState('');
+  const [friends, setFriends] = useState('');
   const [date, setDate] = useState<Date | null>(null);
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
 
@@ -20,6 +23,8 @@ const NewGame: React.FC<NewGameProps> = ({ visible, onClose }) => {
     hideDatePicker();
   };
 
+  const BACKEND_DOMAIN = "https://o-zoo-back.onrender.com";
+
   /** 카카오페이 실행 */
   const handleKakaoPay = async () => {
     const url = 'kakaotalk://pay'; 
@@ -29,6 +34,47 @@ const NewGame: React.FC<NewGameProps> = ({ visible, onClose }) => {
     } else {
       Alert.alert('카카오페이를 실행할 수 없습니다.');
     }
+  };
+ 
+  const loadName = async () => {
+    try {
+      const storedName = await AsyncStorage.getItem('userName');
+      if (storedName) {
+        setName(storedName);
+        console.log(`name set to : ${storedName}`);
+      }
+    } catch (error) {
+      console.error('이름 불러오기 에러:', error);
+    }
+  };
+  
+
+  const registerBet = async () => {
+    const now = new Date();
+    await loadName();
+    try {
+          const res = await fetch(`${BACKEND_DOMAIN}/api/bet/register`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              title : title,
+              content: desc,
+              members: (friends + `, ${name}`).split(',').map(friend => friend.trim()),
+              start: now.toISOString(),
+              end: String(date) + 'T00:00:00',
+            }),
+          });
+          const data = await res.json();
+          console.log(`got data : ${data.success}`)
+          if (data.success) {
+            Alert.alert('내기 등록 성공', '내기가 성공적으로 등록되었습니다.');
+          }
+        } catch (e) {
+          console.log(`error while fetching user info : ${e}`);
+          return;
+        }
   };
 
   /** 카카오 선물하기 */
@@ -62,8 +108,8 @@ const NewGame: React.FC<NewGameProps> = ({ visible, onClose }) => {
           <TextInput
             style={styles.input}
             placeholder="예: 다이어트 대결"
-            value={text}
-            onChangeText={setText}
+            value={title}
+            onChangeText={setTitle}
           />
 
           <Text style={styles.label}>어떤 내기인가요?</Text>
@@ -80,8 +126,8 @@ const NewGame: React.FC<NewGameProps> = ({ visible, onClose }) => {
           <TextInput
             style={styles.input}
             placeholder="심승훈"
-            value={text}
-            onChangeText={setText}
+            value={friends}
+            onChangeText={setFriends}
           />
 
           <Text style={styles.label}>기한을 설정해주세요</Text>
@@ -114,8 +160,14 @@ const NewGame: React.FC<NewGameProps> = ({ visible, onClose }) => {
           </View>
 
           {/* 닫기 버튼 */}
-          <Pressable style={styles.closeButton} onPress={onClose}>
-            <Text style={styles.closeButtonText}>닫기</Text>
+          <Pressable style={styles.closeButton} onPress={
+            async () => {
+              await registerBet();
+              onClose();
+            }
+          
+          }>
+            <Text style={styles.closeButtonText}>등록하기</Text>
           </Pressable>
         </View>
       </View>

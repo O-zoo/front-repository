@@ -17,17 +17,12 @@ const HomeScreen =  () => {
   const [newGameVisible, setNewGameVisible] = useState(false);
   const [myPageVisible, setMyPageVisible] = useState(false);
   const [fortuneVisible, setFortuneVisible] = useState(false); // Fortune 모달 상태
-<<<<<<< HEAD
-  const [nickname] = useState('은챙이');
-
-=======
   const [id, setId] = useState('');
   const [nickname, setNickName] = useState('은챙이');
   const [birthday, setBirthday] = useState('');
   const [winRate, setWinrate] = useState('');
   const [luck, setLuck] = useState('');
   
->>>>>>> 6f6ca2bb2087a8415fb2f4d907069742643efbf3
   const router = useRouter();
   const params = useLocalSearchParams();
 
@@ -129,13 +124,6 @@ const HomeScreen =  () => {
         </CustomText>
       </View>
 
-<<<<<<< HEAD
-=======
-      <Pressable onPress={() => router.push("../ranking/Ranking")}>
-        <Text style={{color:'white', fontFamily: 'Cafe24Ssurround'}}>일단랭킹보기</Text>
-      </Pressable>
-
->>>>>>> 6f6ca2bb2087a8415fb2f4d907069742643efbf3
       {/* 닉네임 + 편집 아이콘 */}
       <View style={styles.nicknameWrapper}>
         <Pressable onPress={() => setMyPageVisible(true)} style={styles.nicknameRow}>
@@ -216,13 +204,8 @@ const styles = StyleSheet.create({
   },
   nicknameText: {
     color: '#fff',
-<<<<<<< HEAD
     fontSize: 30,
-    fontWeight: 'bold',
-=======
-    fontSize: 25,
     fontFamily: 'Cafe24Ssurround',
->>>>>>> 6f6ca2bb2087a8415fb2f4d907069742643efbf3
     marginRight: 6,
   },
   editIcon: {

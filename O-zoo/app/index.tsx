@@ -14,6 +14,7 @@ export default function Index() {
         if(name){
           console.log(`got name : ${name}`);
           router.replace(`/home/Home`);
+          // router.replace(`/main`);
         }
         else if (token) {
           // 자동 로그인 처리
