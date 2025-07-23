@@ -13,6 +13,8 @@ const NewGame: React.FC<NewGameProps> = ({ visible, onClose }) => {
   const [title, setTitle] = useState('');
   const [desc, setDesc] = useState('');
   const [friends, setFriends] = useState('');
+  const [price, setPrice] = useState('');
+  const [price_url, setPriceUrl] = useState('');
   const [date, setDate] = useState<Date | null>(null);
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
 
@@ -53,6 +55,25 @@ const NewGame: React.FC<NewGameProps> = ({ visible, onClose }) => {
     const now = new Date();
     await loadName();
     try {
+          const res = await fetch(`${BACKEND_DOMAIN}/search/naver/product`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              keyword: price
+            }),
+          });
+          const data = await res.json();
+          console.log(`got data : ${data.product_image}, ${data.success}`);
+          if (data.success) {
+            setPriceUrl(data.product_image);
+          }
+        } catch (e) {
+          console.log(`error while fetching price image : ${e}`);
+          return;
+        }
+    try {
           const res = await fetch(`${BACKEND_DOMAIN}/api/bet/register`, {
             method: 'POST',
             headers: {
@@ -62,6 +83,7 @@ const NewGame: React.FC<NewGameProps> = ({ visible, onClose }) => {
               title : title,
               content: desc,
               members: (friends + `, ${name}`).split(',').map(friend => friend.trim()),
+              price: price,
               start: now.toISOString(),
               end: String(date) + 'T00:00:00',
             }),
@@ -83,16 +105,6 @@ const NewGame: React.FC<NewGameProps> = ({ visible, onClose }) => {
     await Linking.openURL(url);
   };
 
-  /** 인스타 스토리 열기 */
-  const handleInstagramStory = async () => {
-    const url = 'instagram://story-camera'; 
-    const supported = await Linking.canOpenURL(url);
-    if (supported) {
-      await Linking.openURL(url);
-    } else {
-      Alert.alert('인스타그램 스토리를 열 수 없습니다.');
-    }
-  };
 
   return (
     <Modal animationType="fade" transparent={true} visible={visible} onRequestClose={onClose}>
@@ -148,15 +160,10 @@ const NewGame: React.FC<NewGameProps> = ({ visible, onClose }) => {
           {/* 무엇을 걸까요? */}
           <Text style={styles.label}>무엇을 걸까요?</Text>
           <View style={styles.betContainer}>
-            <Pressable style={styles.betButton} onPress={handleKakaoPay}>
-              <Text style={styles.betButtonText}>돈 (카카오페이) 〉</Text>
-            </Pressable>
             <Pressable style={styles.betButton} onPress={handleKakaoGift}>
               <Text style={styles.betButtonText}>선물 (카카오선물하기) 〉</Text>
             </Pressable>
-            <Pressable style={styles.betButton} onPress={handleInstagramStory}>
-              <Text style={styles.betButtonText}>자존심 (인스타 스토리) 〉</Text>
-            </Pressable>
+
           </View>
 
           {/* 닫기 버튼 */}

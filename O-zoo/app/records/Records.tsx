@@ -19,7 +19,7 @@ const ongoingData = [
   { id: '2', status: 'ongoing', name: '내기 이름', date: '2025.07.18', members: ['김ㅇㅇ', '이ㅇㅇ'] },
 ];
 
-const RecordsScreen = ({ navigation }) => {
+const RecordsScreen = () => {
   const [selectedTab, setSelectedTab] = useState<'ongoing' | 'all'>('ongoing');
   const [selectedModal, setSelectedModal] = useState<'ING' | 'WIN' | 'LOSE' | null>(null);
   const router = useRouter();
@@ -105,7 +105,7 @@ const RecordsScreen = ({ navigation }) => {
       {selectedModal === 'WIN' && <WIN visible={true} onClose={() => setSelectedModal(null)} />}
       {selectedModal === 'LOSE' && <LOSE visible={true} onClose={() => setSelectedModal(null)} />}
 
-      <Footer navigation={navigation} style={{ position: 'absolute', bottom: 0 }} />
+      <Footer style={{ position: 'absolute', bottom: 0 }} />
     </ImageBackground>
   );
 };
