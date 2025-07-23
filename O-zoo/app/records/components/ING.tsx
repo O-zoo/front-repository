@@ -44,7 +44,7 @@ const ING: React.FC<INGProps> = ({ visible, onClose }) => {
         return;
       }
     };
-    getBetInfo();
+    //getBetInfo("아이스크림 내기");
 
   }, []);
   
