@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, Pressable, Modal } from 'react-native';
+import { useFonts } from 'expo-font';
 
 interface WINProps {
   visible: boolean;
@@ -7,6 +8,15 @@ interface WINProps {
 }
 
 const WIN: React.FC<WINProps> = ({ visible, onClose }) => {
+  const [fontsLoaded] = useFonts({
+    'Cafe24Ssurround': require('../../../assets/fonts/Cafe24Ssurround-v2.0.ttf'),
+  });
+
+  if (!fontsLoaded) {
+    return <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <Text style={{ fontSize: 16 }}>폰트를 불러오는 중입니다...</Text>
+    </View>;
+  }
   return (
     <Modal visible={visible} transparent animationType="fade">
       <View style={styles.overlay}>
@@ -99,15 +109,15 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 8,
     alignItems: 'center',
   },
-  headerText: { fontWeight: 'bold', fontSize: 16, color: '#000' },
+  headerText: { fontFamily: 'Cafe24Ssurround', fontSize: 16, color: '#000' },
   winContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: 12,
   },
   winText: {
-    fontSize: 35,
-    fontWeight: 'bold',
+    fontSize: 30,
+    fontFamily: 'Cafe24Ssurround',
     color: 'red',
     marginRight: 8,
   },
@@ -121,8 +131,8 @@ const styles = StyleSheet.create({
     padding: 12,
     alignItems: 'flex-start',
   },
-  title: { fontSize: 18, fontWeight: 'bold', marginBottom: 4 },
-  subText: { fontSize: 14, color: '#444' },
+  title: { fontSize: 18,  marginBottom: 4, fontFamily: 'Cafe24Ssurround',},
+  subText: { fontSize: 14, color: '#444', fontFamily: 'Cafe24Ssurround',},
   participants: {
     flexDirection: 'row',
     justifyContent: 'space-around',
@@ -137,7 +147,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ccc',
     marginBottom: 4,
   },
-  name: { fontSize: 12, color: '#000' },
+  name: { fontSize: 12, color: '#000',fontFamily: 'Cafe24Ssurround', },
   product: {
     width: 200,
     height: 100,
@@ -148,10 +158,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#333',
     marginBottom: 8,
+    fontFamily: 'Cafe24Ssurround',
   },
   winner: {
     color: 'red',
-    fontWeight: 'bold',
+    fontFamily: 'Cafe24Ssurround',
     fontSize: 16,
   },
   backButton: {
@@ -162,5 +173,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '90%',
   },
-  backButtonText: { color: '#fff' },
+  backButtonText: { color: '#fff', fontFamily: 'Cafe24Ssurround', },
 });

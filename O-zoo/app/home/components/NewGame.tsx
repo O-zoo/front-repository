@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Modal, View, Text, StyleSheet, Pressable, TextInput, Linking, Alert } from 'react-native';
+import { useFonts } from 'expo-font';
+import { Modal, View, Text, StyleSheet, Pressable, TextInput, Linking, Alert, ScrollView } from 'react-native';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 
 interface NewGameProps {
@@ -8,6 +9,10 @@ interface NewGameProps {
 }
 
 const NewGame: React.FC<NewGameProps> = ({ visible, onClose }) => {
+  const [fontsLoaded] = useFonts({
+    'Cafe24Ssurround': require('../../../assets/fonts/Cafe24Ssurround-v2.0.ttf'),
+  });
+
   const [text, setText] = useState('');
   const [desc, setDesc] = useState('');
   const [date, setDate] = useState<Date | null>(null);
@@ -33,7 +38,7 @@ const NewGame: React.FC<NewGameProps> = ({ visible, onClose }) => {
 
   /** 카카오 선물하기 */
   const handleKakaoGift = async () => {
-    const url = 'https://gift.kakao.com'; // 카카오 선물하기 웹페이지
+    const url = 'https://gift.kakao.com';
     await Linking.openURL(url);
   };
 
@@ -48,16 +53,27 @@ const NewGame: React.FC<NewGameProps> = ({ visible, onClose }) => {
     }
   };
 
+  const handleComplete = () => {
+    Alert.alert("완료", "대결이 생성되었습니다!");
+    onClose();
+  };
+
+  if (!fontsLoaded) {
+    return <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <Text style={{ fontSize: 16 }}>폰트를 불러오는 중입니다...</Text>
+    </View>;
+  }
+
   return (
     <Modal animationType="fade" transparent={true} visible={visible} onRequestClose={onClose}>
       <View style={styles.overlay}>
         {/* 상단 타이틀 */}
         <View style={styles.header}>
-          <Text style={{ fontSize: 20, fontWeight: 'bold' }}>새 대결 생성</Text>
+          <Text style={{ fontSize: 20, fontFamily: 'Cafe24Ssurround' }}>새 대결 생성</Text>
         </View>
 
-        {/* 내용 */}
-        <View style={styles.content}>
+        {/* ScrollView로 감싸서 스크롤 가능 */}
+        <ScrollView style={styles.scrollContent} contentContainerStyle={{ alignItems: 'center' }}>
           <Text style={styles.label}>내기 이름이 무엇인가요?</Text>
           <TextInput
             style={styles.input}
@@ -99,7 +115,6 @@ const NewGame: React.FC<NewGameProps> = ({ visible, onClose }) => {
             onCancel={hideDatePicker}
           />
 
-          {/* 무엇을 걸까요? */}
           <Text style={styles.label}>무엇을 걸까요?</Text>
           <View style={styles.betContainer}>
             <Pressable style={styles.betButton} onPress={handleKakaoPay}>
@@ -113,11 +128,16 @@ const NewGame: React.FC<NewGameProps> = ({ visible, onClose }) => {
             </Pressable>
           </View>
 
+          {/* 완료 버튼 */}
+          <Pressable style={styles.completeButton} onPress={handleComplete}>
+            <Text style={styles.completeButtonText}>완료</Text>
+          </Pressable>
+
           {/* 닫기 버튼 */}
           <Pressable style={styles.closeButton} onPress={onClose}>
             <Text style={styles.closeButtonText}>닫기</Text>
           </Pressable>
-        </View>
+        </ScrollView>
       </View>
     </Modal>
   );
@@ -140,20 +160,21 @@ const styles = StyleSheet.create({
     padding: 10,
     alignItems: 'center'
   },
-  content: {
+  scrollContent: {
     width: 300,
-    padding: 20,
+    maxHeight: 600,
+    padding:20,
     backgroundColor: '#fff',
     borderBottomLeftRadius: 10,
     borderBottomRightRadius: 10,
-    alignItems: 'center',
   },
   label: {
-    fontSize: 20,
-    marginTop: 10,
+    fontSize: 16,
+    marginTop: 12,
     marginBottom: 5,
     color: '#000',
     alignSelf: 'flex-start',
+    fontFamily: 'Cafe24Ssurround',
   },
   input: {
     height: 40,
@@ -161,7 +182,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     paddingHorizontal: 10,
     borderRadius: 5,
-    marginTop: 3,
+    marginTop: 0,
     color: "#000",
     width: "100%",
   },
@@ -192,15 +213,28 @@ const styles = StyleSheet.create({
   },
   betButtonText: {
     fontSize: 14,
-    color: '#333',
+    color: 'gray',
+    fontFamily: 'Cafe24Ssurround',
+  },
+  completeButton: {
+    marginTop: 15,
+    padding: 10,
+    backgroundColor: '#ffcc00',
+    borderRadius: 5,
+    alignItems: 'center',
+    width: "100%",
+  },
+  completeButtonText: {
+    color: '#000',
+    fontFamily: 'Cafe24Ssurround',
   },
   closeButton: {
-    marginTop: 15,
+    marginTop: 10,
     padding: 10,
     backgroundColor: '#333',
     borderRadius: 5,
     alignItems: 'center',
     width: "100%",
   },
-  closeButtonText: { color: '#fff' },
+  closeButtonText: { color: '#fff', fontFamily: 'Cafe24Ssurround' },
 });

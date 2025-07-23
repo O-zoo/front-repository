@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import { useLocalSearchParams, useRouter } from "expo-router";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFonts } from 'expo-font';
-import { Image, ImageBackground, Pressable, StyleSheet, View, Text } from 'react-native';
+import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { useEffect, useState } from 'react';
+import { Image, ImageBackground, Pressable, StyleSheet, Text, View } from 'react-native';
 import CustomText from '../../components/CustomText';
 import Footer from '../../components/Footer';
 import Fortune from './components/Fortune';
 import MyPage from './components/MyPage';
 import NewGame from './components/NewGame';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const HomeScreen =  () => {
   const [fontsLoaded] = useFonts({
@@ -17,17 +17,13 @@ const HomeScreen =  () => {
   const [newGameVisible, setNewGameVisible] = useState(false);
   const [myPageVisible, setMyPageVisible] = useState(false);
   const [fortuneVisible, setFortuneVisible] = useState(false); // Fortune 모달 상태
-<<<<<<< HEAD
-  const [nickname] = useState('은챙이');
-
-=======
   const [id, setId] = useState('');
   const [nickname, setNickName] = useState('은챙이');
   const [birthday, setBirthday] = useState('');
   const [winRate, setWinrate] = useState('');
   const [luck, setLuck] = useState('');
+  const [dragonStage, setDragonStage] = useState(0);
   
->>>>>>> 6f6ca2bb2087a8415fb2f4d907069742643efbf3
   const router = useRouter();
   const params = useLocalSearchParams();
 
@@ -47,44 +43,57 @@ const HomeScreen =  () => {
       }
     };
 
-    const getUserInfo = async (id:String) => {
-        try {
-          const res = await fetch(`${BACKEND_DOMAIN}/api/user/findById`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              id : id
-            }),
-          });
-          const data = await res.json();
-          console.log(`got data : ${data.name} ${data.profile_img}, ${data.birth}, ${data.wins}, ${data.losses}, ${data.exp}, ${data.score}`)
-          if (data.loginSuccess) {
-            await AsyncStorage.setItem("userName", data.name);
-            await AsyncStorage.setItem("profile_img", data.profile_img);
-            await AsyncStorage.setItem("userBirth", data.birth);
-            await AsyncStorage.setItem("wins", String(data.wins));
-            await AsyncStorage.setItem("losses", String(data.losses));
-            await AsyncStorage.setItem("exp", String(data.exp));
-            await AsyncStorage.setItem("score", String(data.score));
+    const getUserInfo = async (id: String) => {
+      try {
+        const res = await fetch(`${BACKEND_DOMAIN}/api/user/findById`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ id }),
+        });
 
-            var rate = 0;
-            if(data.wins+data.losses === 0) {
-              rate = 0;
-            } else{
-              rate = Number(((data.wins / (data.wins+data.losses))*100).toFixed(0));
-            }
-            setNickName(data.name);
-            setBirthday(data.birth);
-            getTodayLuck(data.birth);
-            setWinrate(String(rate));
+        const data = await res.json();
+        console.log(`got data : ${data.name} ${data.profile_img}, ${data.birth}, ${data.wins}, ${data.losses}, ${data.exp}, ${data.score}`);
+
+        if (data.loginSuccess) {
+          await AsyncStorage.setItem("userName", data.name);
+          await AsyncStorage.setItem("profile_img", data.profile_img);
+          await AsyncStorage.setItem("userBirth", data.birth);
+          await AsyncStorage.setItem("wins", String(data.wins));
+          await AsyncStorage.setItem("losses", String(data.losses));
+          await AsyncStorage.setItem("exp", String(data.exp));
+          await AsyncStorage.setItem("score", String(data.score));
+
+          // 승률 계산
+          let rate = 0;
+          if (data.wins + data.losses === 0) {
+            rate = 0;
+          } else {
+            rate = Number(((data.wins / (data.wins + data.losses)) * 100).toFixed(0));
           }
-        } catch (e) {
-          console.log(`error while fetching user info : ${e}`);
-          return;
+          setNickName(data.name);
+          setBirthday(data.birth);
+          getTodayLuck(data.birth);
+          setWinrate(String(rate));
+
+          // **승리 횟수에 따라 드래곤 단계 설정**
+          if (data.wins >= 10) {
+            setDragonStage(3);
+          } else if (data.wins >= 5) {
+            setDragonStage(2);
+          } else if (data.wins >= 1) {
+            setDragonStage(1);
+          } else {
+            setDragonStage(0); // egg
+          }
         }
+      } catch (e) {
+        console.log(`error while fetching user info : ${e}`);
+        return;
       }
+    };
+
 
       const getTodayLuck = async (userbirth:String) => {
         try {
@@ -129,13 +138,6 @@ const HomeScreen =  () => {
         </CustomText>
       </View>
 
-<<<<<<< HEAD
-=======
-      <Pressable onPress={() => router.push("../ranking/Ranking")}>
-        <Text style={{color:'white', fontFamily: 'Cafe24Ssurround'}}>일단랭킹보기</Text>
-      </Pressable>
-
->>>>>>> 6f6ca2bb2087a8415fb2f4d907069742643efbf3
       {/* 닉네임 + 편집 아이콘 */}
       <View style={styles.nicknameWrapper}>
         <Pressable onPress={() => setMyPageVisible(true)} style={styles.nicknameRow}>
@@ -151,7 +153,15 @@ const HomeScreen =  () => {
       {/* 알 이미지 */}
       <Pressable style={styles.eggContainer} onPress={() => setFortuneVisible(true)}>
         <Image
-          source={require('../../assets/images/egg.png')}
+          source={
+            dragonStage === 0
+              ? require('../../assets/images/egg.png')
+              : dragonStage === 1
+              ? require('../../assets/images/dragon1.png')
+              : dragonStage === 2
+              ? require('../../assets/images/dragon2.png')
+              : require('../../assets/images/dragon3.png')
+          }
           style={{ width: 300, marginBottom: 180 }}
           resizeMode="contain"
         />
@@ -197,11 +207,12 @@ const styles = StyleSheet.create({
   headerTextContainer: {
     marginTop: 80,
     marginBottom:15,
-    height:50,
+    height:80,
     paddingHorizontal: 40,
     paddingVertical: 10,
     borderRadius: 10,
     backgroundColor: '#fff',
+    paddingTop:32,
   },
   headerText: {
     color: '#000',
@@ -216,13 +227,8 @@ const styles = StyleSheet.create({
   },
   nicknameText: {
     color: '#fff',
-<<<<<<< HEAD
     fontSize: 30,
-    fontWeight: 'bold',
-=======
-    fontSize: 25,
     fontFamily: 'Cafe24Ssurround',
->>>>>>> 6f6ca2bb2087a8415fb2f4d907069742643efbf3
     marginRight: 6,
   },
   editIcon: {

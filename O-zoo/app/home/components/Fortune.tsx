@@ -9,13 +9,16 @@ interface FortuneModalProps {
 }
 
 const FortuneModal: React.FC<FortuneModalProps> = ({ visible, onClose, zodiac = '염소자리' }) => {
-//   const [fontsLoaded] = useFonts({
-//     Cafe24Classic: require('../../../assets/fonts/Cafe24Classictype-v1.1.ttf'),
-//   });
+  const [fontsLoaded] = useFonts({
+    Cafe24Classic : require('../../../assets/fonts/Cafe24Classictype-v1.1.ttf'),
+    Cafe24Ssurround : require('../../../assets/fonts/Cafe24Ssurround-v2.0.ttf')
+  });
 
-//   if (!fontsLoaded) {
-//     return null; // 폰트 로딩 대기
-//   }
+  if (!fontsLoaded) {
+    return <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <Text style={{ fontSize: 16 }}>폰트를 불러오는 중입니다...</Text>
+    </View>;
+  }
 
   return (
     <Modal
@@ -31,7 +34,7 @@ const FortuneModal: React.FC<FortuneModalProps> = ({ visible, onClose, zodiac = 
           resizeMode="contain"
         >
           <Text style={styles.title}>오늘의 운세</Text>
-          <Text style={styles.subtitle}>({zodiac})</Text>
+          <Text style={styles.subtitle}>{zodiac}</Text>
 
           <Pressable style={styles.closeButton} onPress={onClose}>
             <Text style={styles.closeButtonText}>접기</Text>
@@ -63,7 +66,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 100,
     fontFamily: 'Cafe24Classic',
-    fontSize: 26,
+    fontSize: 27,
     color: '#000',
     textAlign: 'center',
   },
@@ -74,6 +77,9 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#000',
     textAlign: 'center',
+    padding:5,
+    paddingLeft:55,
+    paddingRight:55,
   },
   closeButton: {
     marginTop: 50,

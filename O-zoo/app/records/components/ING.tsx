@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, Pressable, Modal } from 'react-native';
+import { useFonts } from 'expo-font';
 
 interface INGProps {
   visible: boolean;
@@ -7,6 +8,14 @@ interface INGProps {
 }
 
 const ING: React.FC<INGProps> = ({ visible, onClose }) => {
+  const [fontsLoaded] = useFonts({
+    'Cafe24Ssurround': require('../../../assets/fonts/Cafe24Ssurround-v2.0.ttf'),
+  });
+  if (!fontsLoaded) {
+    return <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <Text style={{ fontSize: 16 }}>폰트를 불러오는 중입니다...</Text>
+    </View>;
+  }
   return (
     <Modal visible={visible} transparent animationType="fade">
       <View style={styles.overlay}>
@@ -88,22 +97,24 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 8,
     alignItems: 'center',
   },
-  headerText: { fontWeight: 'bold', fontSize: 16, color: '#000' },
+  headerText: { fontSize: 16, color: '#000', fontFamily: 'Cafe24Ssurround' },
   infoBox: {
     width: '100%',
     backgroundColor: '#fff',
     padding: 12,
     alignItems: 'flex-start',
   },
-  title: { fontSize: 18, fontWeight: 'bold', marginBottom: 4 },
-  subText: { fontSize: 14, color: '#444' },
+  title: { fontSize: 18, marginBottom: 4, fontFamily: 'Cafe24Ssurround' },
+  subText: { fontSize: 14, color: '#444', fontFamily: 'Cafe24Ssurround' },
   participants: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     marginTop: 10,
     width: '100%',
+    fontFamily: 'Cafe24Ssurround',
+    
   },
-  participant: { alignItems: 'center' },
+  participant: { alignItems: 'center', fontFamily: 'Cafe24Ssurround', },
   avatar: {
     width: 50,
     height: 50,
@@ -111,7 +122,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ccc',
     marginBottom: 4,
   },
-  name: { fontSize: 12, color: '#000' },
+  name: { fontSize: 12, color: '#000', fontFamily: 'Cafe24Ssurround', },
   sectionTitle: {
     fontWeight: 'bold',
     fontSize: 14,
@@ -123,7 +134,7 @@ const styles = StyleSheet.create({
     height: 100,
     marginVertical: 10,
   },
-  timeHighlight: { color: 'red', fontWeight: 'bold', fontSize: 16 },
+  timeHighlight: { color: 'red', fontSize: 16,fontFamily: 'Cafe24Ssurround', },
   backButton: {
     marginTop: 15,
     padding: 10,
@@ -132,5 +143,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: "90%",
   },
-  backButtonText: { color: '#fff' },
+  backButtonText: { color: '#fff', fontFamily: 'Cafe24Ssurround', },
 });

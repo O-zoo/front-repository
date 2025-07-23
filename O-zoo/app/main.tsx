@@ -210,10 +210,10 @@ const Main = () => {
       <Image source={{ uri: properties?.profile_image }} style={styles.avatar} />
       <Text style={styles.name}> 안녕하세요 {properties?.nickname}님,</Text>
       <View style={{backgroundColor:"#ffcc00", width:300, borderTopLeftRadius:10, borderTopRightRadius:10, padding: 10, alignItems:'center'}}>
-        <Text style={{fontSize: 20, fontWeight:'bold'}}>이길 준비 되셨나요?!</Text>
+        <Text style={{fontSize: 20, fontWeight:'bold', fontFamily: 'Cafe24Ssurround'}}>이길 준비 되셨나요?!</Text>
       </View>
       <View style={styles.CustomBox}>
-        <Text style={{fontSize:20, marginTop:-10}}>닉네임을 입력해주세요.</Text>
+        <Text style={{fontSize:20, marginTop:-10, fontFamily: 'Cafe24Ssurround'}}>닉네임을 입력해주세요.</Text>
         <TextInput
           style={styles.input}
           placeholder="예: 잔망정인"
@@ -285,8 +285,8 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: "#000",
-    fontWeight: "bold",
     fontSize: 16,
+    fontFamily: 'Cafe24Ssurround',
   },
   input: {
     height: 40,

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useFonts } from 'expo-font';
 import { Modal, View, Text, StyleSheet, Pressable } from 'react-native';
 
 interface MyPageProps {
@@ -10,6 +11,16 @@ interface MyPageProps {
 }
 
 const MyPage: React.FC<MyPageProps> = ({ visible, onClose, nickname, birthday, winRate }) => {
+  const [fontsLoaded] = useFonts({
+    'Cafe24Ssurround': require('../../../assets/fonts/Cafe24Ssurround-v2.0.ttf'),
+  });
+
+  if (!fontsLoaded) {
+    return <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <Text style={{ fontSize: 16 }}>폰트를 불러오는 중입니다...</Text>
+    </View>;
+  }
+
   return (
     <Modal animationType="fade" transparent={true} visible={visible} onRequestClose={onClose}>
       <View style={styles.overlay}>
@@ -61,7 +72,8 @@ const styles = StyleSheet.create({
   headerText: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#000',
+    fontFamily: 'Cafe24Ssurround',
   },
   content: {
     width: 300,
@@ -70,12 +82,14 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 10,
     borderBottomRightRadius: 10,
     alignItems: 'center',
+    fontFamily: 'Cafe24Ssurround',
   },
   label: {
     alignSelf: 'flex-start',
     fontSize: 16,
     marginTop: 10,
     color: '#000',
+    fontFamily: 'Cafe24Ssurround',
   },
   inputBox: {
     width: '100%',
@@ -86,10 +100,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingLeft: 10,
     marginTop: 5,
+    fontFamily: 'Cafe24Ssurround',
   },
   text: {
-    fontSize: 16,
-    color: '#333',
+    fontSize: 14,
+    color: 'gray',
+    fontFamily: 'Cafe24Ssurround',
   },
   circle: {
     marginTop: 10,
@@ -104,6 +120,7 @@ const styles = StyleSheet.create({
   circleText: {
     fontSize: 20,
     fontWeight: 'bold',
+    fontFamily: 'Cafe24Ssurround',
   },
   logoutButton: {
     marginTop: 20,
@@ -124,5 +141,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: "100%",
   },
-  closeButtonText: { color: '#fff' },
+  closeButtonText: { color: '#fff', fontFamily: 'Cafe24Ssurround'},
 });

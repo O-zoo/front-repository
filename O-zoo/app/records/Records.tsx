@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Image, ImageBackground, Pressable, StyleSheet, Text, View, FlatList } from 'react-native';
+import React, { useState } from 'react';
+import { FlatList, Image, ImageBackground, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useFonts } from 'expo-font';
 import Footer from '../../components/Footer';
 import ING from './components/ING';
-import WIN from './components/WIN';
 import LOSE from './components/LOSE';
+import WIN from './components/WIN';
 
 const recordsData = [
   { id: '1', status: 'win', name: '내기 이름', date: '2025.07.18', members: ['김ㅇㅇ', '이ㅇㅇ'] },
@@ -19,7 +20,10 @@ const ongoingData = [
   { id: '2', status: 'ongoing', name: '내기 이름', date: '2025.07.18', members: ['김ㅇㅇ', '이ㅇㅇ'] },
 ];
 
-const RecordsScreen = ({ navigation }) => {
+const RecordsScreen = () => {
+  const [fontsLoaded] = useFonts({
+    'Cafe24Ssurround': require('../../assets/fonts/Cafe24Ssurround-v2.0.ttf'),
+  });
   const [selectedTab, setSelectedTab] = useState<'ongoing' | 'all'>('ongoing');
   const [selectedModal, setSelectedModal] = useState<'ING' | 'WIN' | 'LOSE' | null>(null);
   const router = useRouter();
@@ -38,7 +42,11 @@ const RecordsScreen = ({ navigation }) => {
         : item.status === 'lose'
         ? require('../../assets/icons/lose.png')
         : require('../../assets/icons/ongoing.png');
-
+  if (!fontsLoaded) {
+    return <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <Text style={{ fontSize: 16 }}>폰트를 불러오는 중입니다...</Text>
+    </View>;
+  }
     return (
       <Pressable onPress={() => handleItemPress(item.status)} style={styles.item}>
         <Image source={icon} style={styles.statusIcon} resizeMode="contain" />
@@ -105,7 +113,7 @@ const RecordsScreen = ({ navigation }) => {
       {selectedModal === 'WIN' && <WIN visible={true} onClose={() => setSelectedModal(null)} />}
       {selectedModal === 'LOSE' && <LOSE visible={true} onClose={() => setSelectedModal(null)} />}
 
-      <Footer navigation={navigation} style={{ position: 'absolute', bottom: 0 }} />
+      <Footer style={{ position: 'absolute', bottom: 0 }} />
     </ImageBackground>
   );
 };
@@ -131,7 +139,7 @@ const styles = StyleSheet.create({
   homeButtonText: {
     color: '#fff',
     fontSize: 14,
-    fontWeight: 'bold',
+    fontFamily: 'Cafe24Ssurround',
   },
   box: {
     width: 330,
@@ -161,7 +169,7 @@ const styles = StyleSheet.create({
   },
   tabText: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontFamily: 'Cafe24Ssurround',
     color: '#000',
   },
   tabTextActive: {
@@ -184,11 +192,13 @@ const styles = StyleSheet.create({
   },
   itemName: {
     fontSize: 14,
-    fontWeight: 'bold',
+    fontFamily: 'Cafe24Ssurround',
     color: '#000',
   },
   itemDate: {
-    fontSize: 12,
+    fontSize: 10,
+    marginTop:3,
+    fontFamily: 'Cafe24Ssurround',
     color: '#666',
   },
   members: {
@@ -198,5 +208,6 @@ const styles = StyleSheet.create({
   memberText: {
     fontSize: 12,
     color: '#333',
+    fontFamily: 'Cafe24Ssurround',
   },
 });

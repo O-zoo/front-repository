@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { FlatList, Image, ImageBackground, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import Footer from '../../components/Footer';
+import { useFonts } from 'expo-font';
 
 const allRanking = [
   { id: '1', name: '은주연', score: 8080 },
@@ -19,7 +20,11 @@ const friendRanking = [
   { id: '2', name: '은초코', score: 8000 },
 ];
 
-const Ranking = ({ navigation }) => {
+const Ranking = () => {
+  const [fontsLoaded] = useFonts({
+      'Cafe24Ssurround': require('../../assets/fonts/Cafe24Ssurround-v2.0.ttf'),
+  });
+    
   const [selectedTab, setSelectedTab] = useState<'all' | 'friend'>('all');
   const router = useRouter();
   const params = useLocalSearchParams();
@@ -33,7 +38,11 @@ const Ranking = ({ navigation }) => {
     } else if (index === 2) {
       rankIcon = require('../../assets/icons/third.png');
     }
-
+    if (!fontsLoaded) {
+      return <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <Text style={{ fontSize: 16 }}>폰트를 불러오는 중입니다...</Text>
+      </View>;
+    }
     return (
       <View style={styles.rankItem}>
         {rankIcon ? (
@@ -47,6 +56,12 @@ const Ranking = ({ navigation }) => {
       </View>
     );
   };
+
+  // if (!fontsLoaded) {
+  //   return <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+  //     <Text style={{ fontSize: 16 }}>폰트를 불러오는 중입니다...</Text>
+  //   </View>;
+  // }
 
   return (
     <ImageBackground
@@ -83,7 +98,7 @@ const Ranking = ({ navigation }) => {
         />
       </View>
 
-      <Footer navigation={navigation} style={{ position: 'absolute', bottom: 0 }} />
+      <Footer style={{ position: 'absolute', bottom: 0 }} />
     </ImageBackground>
   );
 };
@@ -109,7 +124,7 @@ const styles = StyleSheet.create({
   homeButtonText: {
     color: '#fff',
     fontSize: 14,
-    fontWeight: 'bold',
+    fontFamily: 'Cafe24Ssurround',
   },
   container: {
     marginTop: 90,
@@ -126,22 +141,25 @@ const styles = StyleSheet.create({
     borderTopLeftRadius:10,
     overflow: 'hidden',
     marginBottom: 10,
+    fontFamily: 'Cafe24Ssurround',
   },
   tab: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    fontFamily: 'Cafe24Ssurround',
   },
   tabSelected: {
     backgroundColor: '#fff',
+    fontFamily: 'Cafe24Ssurround',
   },
   tabUnselected: {
     backgroundColor: '#FFD700', // 노란색
   },
   tabText: {
     fontSize: 16,
-    fontWeight: 'bold',
     color: '#000',
+    fontFamily: 'Cafe24Ssurround',
   },
   rankItem: {
     flexDirection: 'row',
@@ -150,6 +168,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
+    fontFamily: 'Cafe24Ssurround',
   },
   medalIcon: {
     width: 24,
@@ -159,7 +178,6 @@ const styles = StyleSheet.create({
   rankText: {
     width: 20,
     textAlign: 'center',
-    fontWeight: 'bold',
     marginRight: 8,
   },
   avatar: {
@@ -172,7 +190,7 @@ const styles = StyleSheet.create({
   name: {
     flex: 1,
     fontSize: 14,
-    fontWeight: 'bold',
+    fontFamily: 'Cafe24Ssurround',
   },
   score: {
     fontSize: 14,
