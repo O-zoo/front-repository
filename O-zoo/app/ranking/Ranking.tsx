@@ -29,7 +29,7 @@ const Ranking = () => {
             },
           });
           const data = await res.json();
-          console.log(`got ranking data: ${data.top10}`);
+          console.log(`got all ranking data: ${data.top10}`);
           setAllRanking(data.top10);
       } catch (error) {
         console.error('전체 랭킹 불러오기 에러:', error);
@@ -51,15 +51,19 @@ const Ranking = () => {
     }
     const loadFriendRanking = async (kakao_token:String) => {
       try {
+        const userId = await AsyncStorage.getItem('id');
         const res = await fetch(`${BACKEND_DOMAIN}/api/user/friendRankings`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
               Authorization: `Bearer ${kakao_token}`,
             },
+            body: JSON.stringify({
+              id: userId,
+            }),
           });
           const data = await res.json();
-          console.log(`got ranking data: ${data.rankings}`);
+          console.log(`got ranking data: ${data.rankings}, ${data.success}`);
           setFriendRanking(data.rankings);
       } catch (error) {
         console.error('친구 랭킹 불러오기 에러:', error);
@@ -89,7 +93,7 @@ const Ranking = () => {
         ) : (
           <Text style={styles.rankText}>{item.rank}</Text>
         )}
-        <View style={styles.avatar} />
+        <Image source={{ uri: item.profile_img }} style={styles.avatar} />
         <Text style={styles.name}>{item.name}</Text>
         <Text style={styles.score}>{item.score}</Text>
       </View>

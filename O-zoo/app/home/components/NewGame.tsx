@@ -19,6 +19,7 @@ const NewGame: React.FC<NewGameProps> = ({ visible, onClose }) => {
   const [desc, setDesc] = useState('');
   const [friends, setFriends] = useState('');
   const [price, setPrice] = useState('');
+  const [price_url, setPriceUrl] = useState('');
   const [date, setDate] = useState<Date | null>(null);
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
 
@@ -59,6 +60,25 @@ const NewGame: React.FC<NewGameProps> = ({ visible, onClose }) => {
     const now = new Date();
     await loadName();
     try {
+          const res = await fetch(`${BACKEND_DOMAIN}/search/naver/product`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              keyword: price
+            }),
+          });
+          const data = await res.json();
+          console.log(`got data : ${data.product_image}, ${data.success}`);
+          if (data.success) {
+            setPriceUrl(data.product_image);
+          }
+        } catch (e) {
+          console.log(`error while fetching price image : ${e}`);
+          return;
+        }
+    try {
           const res = await fetch(`${BACKEND_DOMAIN}/api/bet/register`, {
             method: 'POST',
             headers: {
@@ -68,6 +88,7 @@ const NewGame: React.FC<NewGameProps> = ({ visible, onClose }) => {
               title : title,
               content: desc,
               members: (friends + `, ${name}`).split(',').map(friend => friend.trim()),
+              price: price,
               start: now.toISOString(),
               end: String(date) + 'T00:00:00',
             }),
