@@ -4,6 +4,7 @@ import { FlatList, Image, ImageBackground, Pressable, StyleSheet, Text, View } f
 import { useFonts } from 'expo-font';
 import Footer from '../../components/Footer';
 import ING from './components/ING';
+import OVER from './components/OVER';
 import LOSE from './components/LOSE';
 import WIN from './components/WIN';
 
@@ -16,8 +17,8 @@ const recordsData = [
 ];
 
 const ongoingData = [
-  { id: '1', status: 'ongoing', name: '내기 이름', date: '2025.07.18', members: ['김ㅇㅇ', '이ㅇㅇ'] },
-  { id: '2', status: 'ongoing', name: '내기 이름', date: '2025.07.18', members: ['김ㅇㅇ', '이ㅇㅇ'] },
+  { id: '1', status: 'over', name: '내기 이름', date: '2025.07.20', members: ['심슨', '랄랄'] },
+  { id: '2', status: 'ongoing', name: '내기 이름', date: '2025.07.25', members: ['김ㅇㅇ', '이ㅇㅇ'] },
 ];
 
 const RecordsScreen = () => {
@@ -25,23 +26,27 @@ const RecordsScreen = () => {
     'Cafe24Ssurround': require('../../assets/fonts/Cafe24Ssurround-v2.0.ttf'),
   });
   const [selectedTab, setSelectedTab] = useState<'ongoing' | 'all'>('ongoing');
-  const [selectedModal, setSelectedModal] = useState<'ING' | 'WIN' | 'LOSE' | null>(null);
+  const [selectedModal, setSelectedModal] = useState<'ING' | 'OVER' | 'WIN' | 'LOSE' | null>(null);
   const router = useRouter();
   const params = useLocalSearchParams();
 
   const handleItemPress = (status: string) => {
     if (status === 'ongoing') setSelectedModal('ING');
+    else if (status === 'over') setSelectedModal('OVER');
     else if (status === 'win') setSelectedModal('WIN');
     else if (status === 'lose') setSelectedModal('LOSE');
   };
 
   const renderItem = ({ item }: { item: any }) => {
-    const icon =
-      item.status === 'win'
-        ? require('../../assets/icons/win.png')
-        : item.status === 'lose'
-        ? require('../../assets/icons/lose.png')
-        : require('../../assets/icons/ongoing.png');
+  const icon =
+    item.status === 'win'
+      ? require('../../assets/icons/win.png')
+      : item.status === 'lose'
+      ? require('../../assets/icons/lose.png')
+      : item.status === 'over'
+      ? require('../../assets/icons/over.png')
+      : require('../../assets/icons/ongoing.png');
+
   if (!fontsLoaded) {
     return <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
       <Text style={{ fontSize: 16 }}>폰트를 불러오는 중입니다...</Text>
@@ -110,6 +115,7 @@ const RecordsScreen = () => {
 
       {/* 모달 */}
       {selectedModal === 'ING' && <ING visible={true} onClose={() => setSelectedModal(null)} />}
+      {selectedModal === 'OVER' && <OVER visible={true} onClose={() => setSelectedModal(null)} />}
       {selectedModal === 'WIN' && <WIN visible={true} onClose={() => setSelectedModal(null)} />}
       {selectedModal === 'LOSE' && <LOSE visible={true} onClose={() => setSelectedModal(null)} />}
 

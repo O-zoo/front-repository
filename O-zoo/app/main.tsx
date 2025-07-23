@@ -105,8 +105,10 @@ const Main = () => {
         const res = await fetch(`${BACKEND_DOMAIN}/profile`, {
           headers: { Authorization: `Bearer ${token}` },
         });
+        console.log(`got profile response:${res}`)
         if (!res.ok) throw new Error("프로필 정보를 불러오지 못했습니다.");
         const prof = await res.json();
+        console.log(`prof:${prof.id}, ${JSON.stringify(prof)}`)
         await AsyncStorage.setItem("id", String(prof.id));
         await AsyncStorage.setItem("profile_img", prof.properties.profile_image);
         setProfile(prof);

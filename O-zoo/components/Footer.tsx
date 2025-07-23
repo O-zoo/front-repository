@@ -4,13 +4,13 @@ import { Image, Pressable, StyleSheet, View } from 'react-native';
 import tabTypeZustand from '../store/tabType';
 import CustomText from './CustomText';
 
-
-
 const Footer = ({ style }: { style?: object }) => {
   const router = useRouter();
   const pathname = usePathname();
   const tabType = tabTypeZustand((state) => state.tabType);
   const setTabType = tabTypeZustand((state) => state.setTabType);
+
+  const isHome = pathname.includes('/home/Home'); // 홈 여부 확인
 
   useEffect(() => {
     const path = pathname.split("/").pop() || '';
@@ -19,6 +19,11 @@ const Footer = ({ style }: { style?: object }) => {
     }
   }, [pathname]);
 
+  // 색상 결정 함수
+  const getColor = (type: string) => {
+    return isHome ? '#fff' : tabType === type ? '#FFCC00' : '#fff';
+  };
+
   return (
     <View style={[styles.container, style]}>
       {/* Records */}
@@ -26,14 +31,14 @@ const Footer = ({ style }: { style?: object }) => {
         style={styles.tab}
         onPress={() => {
           setTabType('Records');
-          router.push("/records/Records")
+          router.push("/records/Records");
         }}
       >
         <Image
           source={require('../assets/icons/records.png')}
-          style={[styles.icon, { tintColor: tabType === 'Records' ? '#FFCC00' : '#fff' }]}
+          style={[styles.icon, { tintColor: getColor('Records') }]}
         />
-        <CustomText style={{ color: tabType === 'Records' ? '#FFCC00' : '#fff' }}>
+        <CustomText style={{ color: getColor('Records') }}>
           기록
         </CustomText>
       </Pressable>
@@ -43,14 +48,14 @@ const Footer = ({ style }: { style?: object }) => {
         style={styles.tab}
         onPress={() => {
           setTabType('Select');
-          router.push("/select/Select")
+          router.push("/select/Select");
         }}
       >
         <Image
           source={require('../assets/icons/select.png')}
-          style={[styles.icon, { tintColor: tabType === 'Select' ? '#FFCC00' : '#fff' }]}
+          style={[styles.icon, { tintColor: getColor('Select') }]}
         />
-        <CustomText style={{ color: tabType === 'Select' ? '#FFCC00' : '#fff' }}>
+        <CustomText style={{ color: getColor('Select') }}>
           뽑기
         </CustomText>
       </Pressable>
@@ -60,14 +65,14 @@ const Footer = ({ style }: { style?: object }) => {
         style={styles.tab}
         onPress={() => {
           setTabType('Ranking');
-          router.push("/ranking/Ranking")
+          router.push("/ranking/Ranking");
         }}
       >
         <Image
           source={require('../assets/icons/ranking.png')}
-          style={[styles.icon, { tintColor: tabType === 'Ranking' ? '#FFCC00' : '#fff' }]}
+          style={[styles.icon, { tintColor: getColor('Ranking') }]}
         />
-        <CustomText style={{ color: tabType === 'Ranking' ? '#FFCC00' : '#fff' }}>
+        <CustomText style={{ color: getColor('Ranking') }}>
           랭킹
         </CustomText>
       </Pressable>

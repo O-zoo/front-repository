@@ -71,7 +71,6 @@ const styles = StyleSheet.create({
   },
   headerText: {
     fontSize: 18,
-    fontWeight: 'bold',
     color: '#000',
     fontFamily: 'Cafe24Ssurround',
   },
