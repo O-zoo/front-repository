@@ -57,8 +57,8 @@ const NewGame: React.FC<NewGameProps> = ({ visible, onClose }) => {
   
 
   const registerBet = async () => {
-    const now = new Date();
     await loadName();
+    let priceUrl = '';
     try {
           const res = await fetch(`${BACKEND_DOMAIN}/search/naver/product`, {
             method: 'POST',
@@ -72,36 +72,38 @@ const NewGame: React.FC<NewGameProps> = ({ visible, onClose }) => {
           const data = await res.json();
           console.log(`got data : ${data.product_image}, ${data.success}`);
           if (data.success) {
-            setPriceUrl(data.product_image);
+            await setPriceUrl(data.product_image);
+            priceUrl = data.product_image;
           }
         } catch (e) {
           console.log(`error while fetching price image : ${e}`);
           return;
         }
     try {
-          const res = await fetch(`${BACKEND_DOMAIN}/api/bet/register`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              title : title,
-              content: desc,
-              members: (friends + `, ${name}`).split(',').map(friend => friend.trim()),
-              price: price,
-              start: now.toISOString(),
-              end: String(date) + 'T00:00:00',
-            }),
-          });
-          const data = await res.json();
-          console.log(`got data : ${data.success}`)
-          if (data.success) {
-            Alert.alert('내기 등록 성공', '내기가 성공적으로 등록되었습니다.');
-          }
-        } catch (e) {
-          console.log(`error while fetching user info : ${e}`);
-          return;
-        }
+      console.log(`registering bet with title: ${title}, desc: ${desc}, friends: ${friends}, price: ${price_url}, date: ${date}`);
+      const res = await fetch(`${BACKEND_DOMAIN}/api/bet/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title : title,
+          content: desc,
+          members: (friends + `, ${name}`).split(',').map(friend => friend.trim()),
+          price: priceUrl,
+          price_name: price,
+          end: date,
+        }),
+      });
+      const data = await res.json();
+      console.log(`got bet data : ${JSON.stringify(data)}`)
+      if (data.success) {
+        Alert.alert('내기 등록 성공', '내기가 성공적으로 등록되었습니다.');
+      }
+    } catch (e) {
+      console.log(`error while fetching user info : ${e}`);
+      return;
+    }
   };
 
   /** 카카오 선물하기 */
@@ -182,18 +184,17 @@ const NewGame: React.FC<NewGameProps> = ({ visible, onClose }) => {
           />
 
           {/* 완료 버튼 */}
-          <Pressable style={styles.completeButton} onPress={handleComplete}>
+          <Pressable style={styles.completeButton} onPress={
+            async () => {
+              await registerBet();
+              handleComplete();
+            }
+            }>
             <Text style={styles.completeButtonText}>등록하기</Text>
           </Pressable>
 
           {/* 닫기 버튼 */}
-          <Pressable style={styles.closeButton} onPress={
-            async () => {
-              await registerBet();
-              onClose();
-            }
-          
-          }>
+          <Pressable style={styles.closeButton} onPress={onClose}>
             <Text style={styles.closeButtonText}>닫기</Text>
           </Pressable>
         </ScrollView>
