@@ -1,16 +1,20 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, Pressable, Modal } from 'react-native';
+import { View, Text, StyleSheet, Image, Pressable, Modal, Linking } from 'react-native';
 import { useFonts } from 'expo-font';
 
 interface WINProps {
   visible: boolean;
   onClose: () => void;
+  bet: any;
 }
 
-const WIN: React.FC<WINProps> = ({ visible, onClose }) => {
+const WIN: React.FC<WINProps> = ({ visible, onClose, bet }) => {
   const [fontsLoaded] = useFonts({
     'Cafe24Ssurround': require('../../../assets/fonts/Cafe24Ssurround-v2.0.ttf'),
   });
+
+  const keyword = bet.price_name;
+  const giftUrl = `https://gift.kakao.com/search/result?query=${encodeURIComponent(keyword)}&searchType=search_typing_keyword`;
 
   if (!fontsLoaded) {
     return <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -38,19 +42,17 @@ const WIN: React.FC<WINProps> = ({ visible, onClose }) => {
 
           {/* 내기 정보 */}
           <View style={styles.infoBox}>
-            <Text style={styles.title}>아이스크림 내기</Text>
-            <Text style={styles.subText}>2025년 7월 20일까지</Text>
-            <Text style={styles.subText}>은주연 : nn kg까지 살빼기</Text>
-            <Text style={styles.subText}>심승훈 : 72kg까지 근육 찌우기</Text>
+            <Text style={styles.title}>{bet.name}</Text>
+            <Text style={styles.subText}>{bet.content}</Text>
           </View>
 
           {/* 참여자 */}
           <View style={styles.infoBox}>
             <Text style={styles.title}>참여자</Text>
             <View style={styles.participants}>
-              {['은챙이(나)', '심슨', '욜깅'].map((name, idx) => (
+              {bet.members.map((name:any, idx:any, profile_img:any) => (
                 <View key={idx} style={styles.participant}>
-                  <View style={styles.avatar} />
+                  <Image source={{ uri: profile_img }} style={styles.avatar} />
                   <Text style={styles.name}>{name}</Text>
                 </View>
               ))}
@@ -62,16 +64,18 @@ const WIN: React.FC<WINProps> = ({ visible, onClose }) => {
             <Text style={styles.title}>걸려있는 상품</Text>
           </View>
           <Image
-            source={require('../../../assets/images/watermelon.jpeg')}
+            source={{ uri: bet.price_url }}
             style={styles.product}
             resizeMode="contain"
           />
-          <Text style={styles.claimText}>선물하러가기 &gt;</Text>
+          <Pressable onPress={() => Linking.openURL(giftUrl)}>
+            <Text style={styles.claimText}>선물하러가기 &gt;</Text>
+          </Pressable>
 
           {/* 이긴 사람 */}
           <View style={styles.infoBox}>
             <Text style={styles.title}>이긴 사람</Text>
-            <Text style={styles.winner}>욜깅</Text>
+            <Text style={styles.winner}>{bet.winner.name}</Text>
           </View>
 
           {/* 닫기 버튼 */}

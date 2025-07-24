@@ -31,17 +31,6 @@ const NewGame: React.FC<NewGameProps> = ({ visible, onClose }) => {
   };
 
   const BACKEND_DOMAIN = "https://o-zoo-back.onrender.com";
-
-  /** 카카오페이 실행 */
-  const handleKakaoPay = async () => {
-    const url = 'kakaotalk://pay'; 
-    const supported = await Linking.canOpenURL(url);
-    if (supported) {
-      await Linking.openURL(url);
-    } else {
-      Alert.alert('카카오페이를 실행할 수 없습니다.');
-    }
-  };
  
   const loadName = async () => {
     try {
@@ -54,7 +43,7 @@ const NewGame: React.FC<NewGameProps> = ({ visible, onClose }) => {
       console.error('이름 불러오기 에러:', error);
     }
   };
-  
+  loadName();
 
   const registerBet = async () => {
     await loadName();
@@ -80,7 +69,8 @@ const NewGame: React.FC<NewGameProps> = ({ visible, onClose }) => {
           return;
         }
     try {
-      console.log(`registering bet with title: ${title}, desc: ${desc}, friends: ${friends}, price: ${price_url}, date: ${date}`);
+      const members = (friends + `, ${name}`).split(',').map(friend => friend.trim());
+      console.log(`registering bet with title: ${title}, desc: ${desc}, friends: ${members}, price: ${price_url}, date: ${date}`);
       const res = await fetch(`${BACKEND_DOMAIN}/api/bet/register`, {
         method: 'POST',
         headers: {
@@ -89,7 +79,7 @@ const NewGame: React.FC<NewGameProps> = ({ visible, onClose }) => {
         body: JSON.stringify({
           title : title,
           content: desc,
-          members: (friends + `, ${name}`).split(',').map(friend => friend.trim()),
+          members: members,
           price: priceUrl,
           price_name: price,
           end: date,
@@ -105,13 +95,6 @@ const NewGame: React.FC<NewGameProps> = ({ visible, onClose }) => {
       return;
     }
   };
-
-  /** 카카오 선물하기 */
-  const handleKakaoGift = async () => {
-    const url = 'https://gift.kakao.com';
-    await Linking.openURL(url);
-  };
-
 
   const handleComplete = () => {
     Alert.alert("완료", "대결이 생성되었습니다!");

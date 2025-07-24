@@ -5,15 +5,17 @@ import { useFonts } from 'expo-font';
 interface OVERProps {
   visible: boolean;
   onClose: () => void;
+  bet: any;
 }
 
-const OVER: React.FC<OVERProps> = ({ visible, onClose }) => {
+const OVER: React.FC<OVERProps> = ({ visible, onClose, bet }) => {
   const [fontsLoaded] = useFonts({
     'Cafe24Ssurround': require('../../../assets/fonts/Cafe24Ssurround-v2.0.ttf'),
   });
 
-  const participants = ['은챙이(나)', '심슨', '욜깅'];
+
   const [winner, setWinner] = useState<string | null>(null); // 선택된 이긴 사람
+  const BACKEND_DOMAIN = "https://o-zoo-back.onrender.com";
 
   if (!fontsLoaded) {
     return (
@@ -23,10 +25,30 @@ const OVER: React.FC<OVERProps> = ({ visible, onClose }) => {
     );
   }
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
     if (winner) {
       console.log(`선택된 이긴 사람: ${winner}`);
       // 여기에 API 요청 등 완료 처리 로직 추가 가능
+      var losers = bet.members.filter((name: string) => name !== winner);
+      try {
+        const res = await fetch(`${BACKEND_DOMAIN}/api/bet/update`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ content: bet.content, winner: winner, loser:losers}),
+        });
+
+        const data = await res.json();
+        console.log(`updated bet : ${JSON.stringify(data)}`);
+
+        if (data.success) {
+          
+        }
+      } catch (e) {
+        console.log(`error while updating bets : ${e}`);
+        return;
+      }
       onClose();
     } else {
       alert('이긴 사람을 선택해주세요!');
@@ -44,8 +66,8 @@ const OVER: React.FC<OVERProps> = ({ visible, onClose }) => {
 
           {/* 내기 정보 */}
           <View style={styles.infoBox}>
-            <Text style={styles.title}>술배</Text>
-            <Text style={styles.subText}>2025년 7월 20일까지 어쩌구</Text>
+            <Text style={styles.title}>{bet.name}</Text>
+            <Text style={styles.subText}>{bet.content}</Text>
           </View>
 
           {/* 걸려있는 상품 */}
@@ -53,7 +75,7 @@ const OVER: React.FC<OVERProps> = ({ visible, onClose }) => {
             <Text style={styles.title}>걸려있는 상품</Text>
           </View>
           <Image
-            source={require('../../../assets/images/watermelon.jpeg')}
+            source={{ uri: bet.price_url }}
             style={styles.product}
             resizeMode="contain"
           />
@@ -62,7 +84,7 @@ const OVER: React.FC<OVERProps> = ({ visible, onClose }) => {
           <View style={styles.infoBox}>
             <Text style={styles.title}>이긴 사람을 선택해주세요</Text>
             <View style={styles.winnerSelectContainer}>
-              {participants.map((name) => (
+              {bet.members.map((name:any) => (
                 <Pressable
                   key={name}
                   style={[

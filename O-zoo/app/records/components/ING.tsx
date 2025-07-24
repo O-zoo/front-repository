@@ -7,9 +7,10 @@ import CountDown from 'react-native-countdown-component';
 interface INGProps {
   visible: boolean;
   onClose: () => void;
+  bet: any; 
 }
 
-const ING: React.FC<INGProps> = ({ visible, onClose }) => {
+const ING: React.FC<INGProps> = ({ visible, onClose, bet }) => {
   const [fontsLoaded] = useFonts({
     'Cafe24Ssurround': require('../../../assets/fonts/Cafe24Ssurround-v2.0.ttf'),
   });
@@ -17,36 +18,7 @@ const ING: React.FC<INGProps> = ({ visible, onClose }) => {
   const [until, setUntil] = useState<number>(0);
   const BACKEND_DOMAIN = "https://o-zoo-back.onrender.com";
 
-
-  useEffect(() => {
-    const getBetInfo = async (content: String) => {
-      try {
-        const res = await fetch(`${BACKEND_DOMAIN}/api/bet/findByContent`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ content }),
-        });
-
-        const data = await res.json();
-        console.log(`got data : ${data.title} ${data.content}, ${data.members}, ${data.start}, ${data.end}, ${data.price}`);
-
-        if (data.success) {
-          const endDate = new Date(data.end);
-          const secondsLeft = Math.max(0, Math.floor((endDate.getTime() - Date.now()) / 1000));
-          setUntil(secondsLeft);
-
-          await AsyncStorage.setItem("endDate", data.end);
-        }
-      } catch (e) {
-        console.log(`error while fetching user info : ${e}`);
-        return;
-      }
-    };
-    //getBetInfo("아이스크림 내기");
-
-  }, []);
+  const now = new Date().getTime();
   
 
 
@@ -66,17 +38,17 @@ const ING: React.FC<INGProps> = ({ visible, onClose }) => {
 
           {/* 내기 정보 */}
           <View style={styles.infoBox}>
-            <Text style={styles.title}>아이스크림 내기</Text>
-            <Text style={styles.subText}>2025년 7월 20일까지 뭐뭐하기</Text>
+            <Text style={styles.title}>{bet.name}</Text>
+            <Text style={styles.subText}>{bet.content}</Text>
           </View>
 
           {/* 참여자 */}
           <View style={styles.infoBox}>
             <Text style={styles.title}>참여자</Text>
             <View style={styles.participants}>
-              {['은챙이(나)', '심슨', '욜깅'].map((name, idx) => (
+              {bet.members.map((name:any, idx:any, profile_img:any) => (
                 <View key={idx} style={styles.participant}>
-                  <View style={styles.avatar} />
+                  <Image source={{ uri: profile_img }} style={styles.avatar} />
                   <Text style={styles.name}>{name}</Text>
                 </View>
               ))}
@@ -88,7 +60,7 @@ const ING: React.FC<INGProps> = ({ visible, onClose }) => {
             <Text style={styles.title}>걸려있는 상품</Text>
           </View>
             <Image
-              source={require('../../../assets/images/watermelon.jpeg')} // 수박바 이미지
+              source={{ uri: bet.price_url }} // 수박바 이미지
               style={styles.product}
               resizeMode="contain"
             />
@@ -96,11 +68,12 @@ const ING: React.FC<INGProps> = ({ visible, onClose }) => {
           {/* 남은 시간 */}
           <View style={styles.infoBox}>
             <Text style={styles.title}>남은 시간</Text>
-            {until > 0 ? (
+
+            {new Date(bet.end).getTime() - Date.now() > 0 ? (
               <CountDown
                 size={18}
-                until={until}
-                onFinish={() => alert('Finished')}
+                until={Math.floor((new Date(bet.end).getTime() - Date.now()) / 1000)} // 초 단위
+                onFinish={() => alert('내기가 종료되었습니다.')}
                 digitStyle={{ backgroundColor: '#FFF' }}
                 digitTxtStyle={{ color: '#000', fontFamily: 'Cafe24Ssurround' }}
                 timeLabelStyle={{ color: '#444', fontFamily: 'Cafe24Ssurround', fontSize: 12 }}

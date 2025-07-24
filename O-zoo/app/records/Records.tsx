@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FlatList, Image, ImageBackground, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFonts } from 'expo-font';
 import Footer from '../../components/Footer';
@@ -7,8 +7,9 @@ import ING from './components/ING';
 import OVER from './components/OVER';
 import LOSE from './components/LOSE';
 import WIN from './components/WIN';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const recordsData = [
+let recordsData = [
   { id: '1', status: 'win', name: '내기 이름', date: '2025.07.18', members: ['김ㅇㅇ', '이ㅇㅇ'] },
   { id: '2', status: 'lose', name: '내기 이름', date: '2025.07.18', members: ['김ㅇㅇ', '이ㅇㅇ'] },
   { id: '3', status: 'lose', name: '내기 이름', date: '2025.07.18', members: ['김ㅇㅇ', '이ㅇㅇ'] },
@@ -16,7 +17,7 @@ const recordsData = [
   { id: '5', status: 'win', name: '내기 이름', date: '2025.07.18', members: ['김ㅇㅇ', '이ㅇㅇ'] },
 ];
 
-const ongoingData = [
+let ongoingData = [
   { id: '1', status: 'over', name: '내기 이름', date: '2025.07.20', members: ['심슨', '랄랄'] },
   { id: '2', status: 'ongoing', name: '내기 이름', date: '2025.07.25', members: ['김ㅇㅇ', '이ㅇㅇ'] },
 ];
@@ -27,15 +28,99 @@ const RecordsScreen = () => {
   });
   const [selectedTab, setSelectedTab] = useState<'ongoing' | 'all'>('ongoing');
   const [selectedModal, setSelectedModal] = useState<'ING' | 'OVER' | 'WIN' | 'LOSE' | null>(null);
+  const [selectedItem, setSelectedItem] = useState<any | null>(null);
   const router = useRouter();
   const params = useLocalSearchParams();
 
-  const handleItemPress = (status: string) => {
+  const BACKEND_DOMAIN = "https://o-zoo-back.onrender.com";
+
+  const handleItemPress = (item: any) => {
+    let status = item.status;
     if (status === 'ongoing') setSelectedModal('ING');
     else if (status === 'over') setSelectedModal('OVER');
     else if (status === 'win') setSelectedModal('WIN');
     else if (status === 'lose') setSelectedModal('LOSE');
+
+    setSelectedItem(item); // 누른 item 저장
+
+    switch (item.status) {
+      case 'ongoing':
+        setSelectedModal('ING');
+        break;
+      case 'over':
+        setSelectedModal('OVER');
+        break;
+      case 'win':
+        setSelectedModal('WIN');
+        break;
+      case 'lose':
+        setSelectedModal('LOSE');
+        break;
+    }
   };
+
+  const handleCloseModal = () => {
+    setSelectedModal(null);
+    setSelectedItem(null);  
+  };
+
+  useEffect(() => {
+
+
+    const getOngoingBets = async () => {
+      const storedId = await AsyncStorage.getItem('id');
+      try {
+        const res = await fetch(`${BACKEND_DOMAIN}/api/user/bet/ongoing`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ id: storedId }),
+        });
+
+        const data = await res.json();
+        console.log(`got ongoing bet : ${JSON.stringify(data)}`);
+
+        if (data.success) {
+          ongoingData = data.ongoingbets
+        }
+      } catch (e) {
+        console.log(`error while getting ongoing bets : ${e}`);
+        return;
+      }
+    };
+
+    getOngoingBets();
+    }, []);
+
+    useEffect(() => {
+
+
+    const getEndedBets = async () => {
+      const storedId = await AsyncStorage.getItem('id');
+      try {
+        const res = await fetch(`${BACKEND_DOMAIN}/api/user/bet/ended`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ id: storedId }),
+        });
+
+        const data = await res.json();
+        console.log(`got ended bet : ${JSON.stringify(data)}`);
+
+        if (data.success) {
+          recordsData = data.bets
+        }
+      } catch (e) {
+        console.log(`error while getting ongoing bets : ${e}`);
+        return;
+      }
+    };
+
+    getEndedBets();
+    }, []);
 
   const renderItem = ({ item }: { item: any }) => {
   const icon =
@@ -47,13 +132,15 @@ const RecordsScreen = () => {
       ? require('../../assets/icons/over.png')
       : require('../../assets/icons/ongoing.png');
 
+
+
   if (!fontsLoaded) {
     return <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
       <Text style={{ fontSize: 16 }}>폰트를 불러오는 중입니다...</Text>
     </View>;
   }
     return (
-      <Pressable onPress={() => handleItemPress(item.status)} style={styles.item}>
+      <Pressable onPress={() => handleItemPress(item)} style={styles.item}>
         <Image source={icon} style={styles.statusIcon} resizeMode="contain" />
         <View style={styles.itemInfo}>
           <Text style={styles.itemName}>{item.name}</Text>
@@ -114,10 +201,10 @@ const RecordsScreen = () => {
       </View>
 
       {/* 모달 */}
-      {selectedModal === 'ING' && <ING visible={true} onClose={() => setSelectedModal(null)} />}
-      {selectedModal === 'OVER' && <OVER visible={true} onClose={() => setSelectedModal(null)} />}
-      {selectedModal === 'WIN' && <WIN visible={true} onClose={() => setSelectedModal(null)} />}
-      {selectedModal === 'LOSE' && <LOSE visible={true} onClose={() => setSelectedModal(null)} />}
+      {selectedModal === 'ING' && <ING visible={true} onClose={handleCloseModal} bet={selectedItem}/>}
+      {selectedModal === 'OVER' && <OVER visible={true} onClose={handleCloseModal} bet={selectedItem}/>}
+      {selectedModal === 'WIN' && <WIN visible={true} onClose={handleCloseModal} bet={selectedItem}/>}
+      {selectedModal === 'LOSE' && <LOSE visible={true} onClose={handleCloseModal} bet={selectedItem}/>}
 
       <Footer style={{ position: 'absolute', bottom: 0 }} />
     </ImageBackground>
