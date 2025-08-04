@@ -1,6 +1,5 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFonts } from 'expo-font';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Image, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import CountDown from 'react-native-countdown-component';
 
@@ -46,10 +45,10 @@ const ING: React.FC<INGProps> = ({ visible, onClose, bet }) => {
           <View style={styles.infoBox}>
             <Text style={styles.title}>참여자</Text>
             <View style={styles.participants}>
-              {bet.members.map((name:any, idx:any, profile_img:any) => (
+              {bet.members.map((member:any, idx:any) => (
                 <View key={idx} style={styles.participant}>
-                  <Image source={{ uri: profile_img }} style={styles.avatar} />
-                  <Text style={styles.name}>{name}</Text>
+                  <Image source={{ uri: member.profile_img }} style={styles.avatar} />
+                  <Text style={styles.name}>{member.name}</Text>
                 </View>
               ))}
             </View>

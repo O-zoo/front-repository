@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Image, Pressable, Modal } from 'react-native';
 import { useFonts } from 'expo-font';
+import React, { useState } from 'react';
+import { Image, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 
 interface OVERProps {
   visible: boolean;
@@ -84,22 +84,22 @@ const OVER: React.FC<OVERProps> = ({ visible, onClose, bet }) => {
           <View style={styles.infoBox}>
             <Text style={styles.title}>이긴 사람을 선택해주세요</Text>
             <View style={styles.winnerSelectContainer}>
-              {bet.members.map((name:any) => (
+              {bet.members.map((member:any) => (
                 <Pressable
-                  key={name}
+                  key={member.name}
                   style={[
                     styles.winnerButton,
-                    winner === name && styles.winnerButtonSelected,
+                    winner === member.name && styles.winnerButtonSelected,
                   ]}
-                  onPress={() => setWinner(name)}
+                  onPress={() => setWinner(member.name)}
                 >
                   <Text
                     style={[
                       styles.winnerButtonText,
-                      winner === name && styles.winnerButtonTextSelected,
+                      winner === member.name && styles.winnerButtonTextSelected,
                     ]}
                   >
-                    {name}
+                    {member.name}
                   </Text>
                 </Pressable>
               ))}

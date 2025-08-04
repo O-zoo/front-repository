@@ -1,13 +1,13 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFonts } from 'expo-font';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { FlatList, Image, ImageBackground, Pressable, StyleSheet, Text, View } from 'react-native';
-import { useFonts } from 'expo-font';
 import Footer from '../../components/Footer';
 import ING from './components/ING';
-import OVER from './components/OVER';
 import LOSE from './components/LOSE';
+import OVER from './components/OVER';
 import WIN from './components/WIN';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 let recordsData = [
   { id: '1', status: 'win', name: '내기 이름', date: '2025.07.18', members: ['김ㅇㅇ', '이ㅇㅇ'] },
@@ -147,9 +147,9 @@ const RecordsScreen = () => {
           <Text style={styles.itemDate}>{item.date}</Text>
         </View>
         <View style={styles.members}>
-          {item.members.map((member: string, idx: number) => (
+          {item.members.map((member: any, idx: number) => (
             <Text key={idx} style={styles.memberText}>
-              {member}
+              {member.name}
             </Text>
           ))}
         </View>
